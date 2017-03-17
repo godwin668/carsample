@@ -1,4 +1,4 @@
-package com.gaocy.sample;
+package com.gaocy;
 
 import com.gaocy.sample.spider.SpiderFactory;
 import com.gaocy.sample.util.ConfUtil;
@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Created by godwin on 2017-03-16.
  */
-public class SampleMain {
+public class App {
 
     public static void main(String[] args) {
         // 1 瓜子             https://www.guazi.com/bj/
