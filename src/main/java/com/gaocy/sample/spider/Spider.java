@@ -1,5 +1,6 @@
 package com.gaocy.sample.spider;
 
+import com.gaocy.sample.vo.CityEnum;
 import com.gaocy.sample.vo.InfoVo;
 
 import java.util.List;
@@ -9,6 +10,8 @@ import java.util.List;
  */
 public interface Spider {
 
-    public List<InfoVo> listByCity(String city);
+    public CityEnum[] getCityArr();
+
+    List<InfoVo> listByCity(CityEnum city);
 
 }

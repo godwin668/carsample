@@ -15,7 +15,7 @@ public class CityUtil {
     static {
         // 瓜子
         Map<String, String> guaziMap = new HashMap<String, String>();
-        spiderCityMap.put(SpiderEnum.GUAZI, guaziMap);
+        spiderCityMap.put(SpiderEnum.guazi, guaziMap);
         String[] guaziCityArr = ConfUtil.getString("city.map.guazi").split(",");
         for (String guaziCity : guaziCityArr) {
             String[] guaziCityKV = guaziCity.split("-");
@@ -24,7 +24,7 @@ public class CityUtil {
 
         // 优信
         Map<String, String> youxinMap = new HashMap<String, String>();
-        spiderCityMap.put(SpiderEnum.YOUXIN, youxinMap);
+        spiderCityMap.put(SpiderEnum.youxin, youxinMap);
         String[] youxinCityArr = ConfUtil.getString("city.map.youxin").split(",");
         for (String youxinCity : youxinCityArr) {
             String[] youxinCityKV = youxinCity.split("-");
@@ -43,8 +43,8 @@ public class CityUtil {
     public static void main(String[] args) {
         System.out.println(ConfUtil.getString("city.map.guazi"));
 
-        System.out.println(SpiderEnum.GUAZI + ": " + get(SpiderEnum.GUAZI, "北京"));
-        System.out.println(SpiderEnum.YOUXIN + ": " + get(SpiderEnum.YOUXIN, "北京"));
+        System.out.println(SpiderEnum.guazi + ": " + get(SpiderEnum.guazi, "北京"));
+        System.out.println(SpiderEnum.youxin + ": " + get(SpiderEnum.youxin, "北京"));
 
     }
 }

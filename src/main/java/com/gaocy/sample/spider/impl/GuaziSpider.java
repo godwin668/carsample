@@ -4,6 +4,7 @@ import com.gaocy.sample.spider.Spider;
 import com.gaocy.sample.spider.SpiderBase;
 import com.gaocy.sample.spider.SpiderEnum;
 import com.gaocy.sample.util.SenderUtil;
+import com.gaocy.sample.vo.CityEnum;
 import com.gaocy.sample.vo.InfoVo;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -30,9 +31,9 @@ public class GuaziSpider extends SpiderBase implements Spider {
      * @return
      */
     @Override
-    public List<InfoVo> listByCity(String city) {
+    public List<InfoVo> listByCity(CityEnum city) {
         List<InfoVo> infoList = new ArrayList<InfoVo>();
-        String url = baseUrl.replaceFirst("<city>", city);
+        String url = baseUrl.replaceFirst("<city>", city.getPy());
         int pageCount = getPageCount(url);
         pageCount = 2;
         for (int i = 1; i <= pageCount; i++) {
@@ -48,13 +49,17 @@ public class GuaziSpider extends SpiderBase implements Spider {
                     String infoHref = infoElement.select(".list-infoBox .infoBox a").get(0).attr("href");
                     String infoCity = infoHref.replaceFirst("/(\\w+)/(\\w+).htm", "$1");
                     String infoId = infoHref.replaceFirst("/(\\w+)/(\\w+).htm", "$2");
-                    String infoRegDate = infoElement.select(".list-infoBox .fc-gray span").get(0).text().replaceAll("上牌", "");
+                    String infoRegDateStr = infoElement.select(".list-infoBox .fc-gray span").get(0).text().replaceAll("上牌", "");
+                    String infoRegDate = infoRegDateStr.replaceFirst("(\\d+)年(\\d+)月", "$1$2");
+                    if (infoRegDate.length() == 5) {
+                        infoRegDate = infoRegDate.replaceFirst("(\\d{4})(\\d{1})", "$10$2");
+                    }
                     String infoMileageStr = infoElement.select(".list-infoBox .fc-gray").get(0).text();
                     String infoMileage = infoMileageStr.substring(infoMileageStr.indexOf("行驶") + 2);
                     String infoPrice = infoElement.select(".list-infoBox .priType-s .priType").get(0).text();
 
                     InfoVo vo = new InfoVo();
-                    vo.setSrc(SpiderEnum.GUAZI);
+                    vo.setSrc(SpiderEnum.guazi);
                     vo.setCity(infoCity);
                     vo.setSrcId(infoId);
                     vo.setName(infoName);

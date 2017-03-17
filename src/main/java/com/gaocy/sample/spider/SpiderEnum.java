@@ -5,8 +5,8 @@ package com.gaocy.sample.spider;
  */
 public enum SpiderEnum {
 
-    GUAZI("https://www.guazi.com/bj/buy/o1/"),
-    YOUXIN("http://www.xin.com/beijing/s/i1/");
+    guazi("https://www.guazi.com/bj/buy/o1/"),
+    youxin("http://www.xin.com/beijing/s/i1/");
 
     private String url;
 
@@ -15,9 +15,9 @@ public enum SpiderEnum {
     }
 
     public static void main(String[] args) {
-        String s = "GUAZI";
+        String s = "guazi";
         SpiderEnum spider = SpiderEnum.valueOf(s);
         System.out.println(spider);
-        System.out.println(spider == SpiderEnum.GUAZI);
+        System.out.println(spider == SpiderEnum.guazi);
     }
 }

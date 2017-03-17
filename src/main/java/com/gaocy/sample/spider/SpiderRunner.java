@@ -2,6 +2,7 @@ package com.gaocy.sample.spider;
 
 import com.alibaba.fastjson.JSON;
 import com.gaocy.sample.util.ConfUtil;
+import com.gaocy.sample.vo.CityEnum;
 import com.gaocy.sample.vo.InfoVo;
 
 import java.text.DateFormat;
@@ -32,9 +33,9 @@ public class SpiderRunner<T extends List<InfoVo>> implements Callable {
 
     @Override
     public T call() throws Exception {
-        String[] cityArr = ConfUtil.getString("init.city.list").split(",");
+        CityEnum[] cityArr = spider.getCityArr();
         T infoAllList = (T) new ArrayList<InfoVo>();
-        for (String city : cityArr) {
+        for (CityEnum city : cityArr) {
             List<InfoVo> infoList = spider.listByCity(city);
             infoAllList.addAll(infoList);
         }
@@ -42,9 +43,9 @@ public class SpiderRunner<T extends List<InfoVo>> implements Callable {
         return infoAllList;
     }
 
-    public static void callback(List<InfoVo> list) {
+    public void callback(List<InfoVo> list) {
         for (InfoVo vo : list) {
-            SpiderBase.logToFile("rawsample/" + SpiderEnum.GUAZI.toString().toLowerCase() + "/" + dfDate.format(new Date()) + ".txt", JSON.toJSONString(vo));
+            SpiderBase.logToFile("rawsample/" + vo.getSrc().name() + "/" + dfDate.format(new Date()) + ".txt", JSON.toJSONString(vo));
         }
     }
 }

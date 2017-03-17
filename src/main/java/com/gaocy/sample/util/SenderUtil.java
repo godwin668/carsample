@@ -7,15 +7,15 @@ import com.gaocy.sample.spider.SpiderBase;
  */
 public class SenderUtil {
 
-    public static enum MessageLevel {
+    public enum MessageLevel {
         ERROR,
         WARN,
-        INFO;
+        INFO
     }
 
     public static void sendMessage(MessageLevel level, String message) {
         // TODO
-        SpiderBase.logToFile("error", "[" + level + "] " + message);
+        SpiderBase.logToFile("error.txt", "[" + level + "] " + message);
         System.err.println("[" + level + "] " + message);
     }
 

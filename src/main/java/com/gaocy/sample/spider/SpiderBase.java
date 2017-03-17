@@ -2,6 +2,7 @@ package com.gaocy.sample.spider;
 
 import com.alibaba.fastjson.JSON;
 import com.gaocy.sample.util.ConfUtil;
+import com.gaocy.sample.vo.CityEnum;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.jsoup.Jsoup;
@@ -21,13 +22,25 @@ public class SpiderBase {
 
     private static int sleepInterval = ConfUtil.getInt("spider.sleep.time");
 
-    String[] cityArr;
+    CityEnum[] cityArr;
 
-    public SpiderBase(String[] cityArr) {
-        this.cityArr = cityArr;
+    public SpiderBase(String[] cityStrArr) {
+        if (null == cityStrArr) {
+            return;
+        }
+        cityArr = new CityEnum[cityStrArr.length];
+        for (int i = 0; i < cityStrArr.length; i++) {
+            cityArr[i] = CityEnum.valueOf(cityStrArr[i]);
+        }
     }
 
-    // abstract int getPageCount(String url);
+    public CityEnum[] getCityArr() {
+        return cityArr;
+    }
+
+    public void setCityArr(CityEnum[] cityArr) {
+        this.cityArr = cityArr;
+    }
 
     public static Document getDoc(String url) {
         Document doc = null;
