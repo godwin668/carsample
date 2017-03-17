@@ -17,7 +17,7 @@ import java.util.List;
  */
 public class SpiderBase {
 
-    static File logFile = new File("/Users/Godwin/car/sample.log");
+    static File logFile = new File(ConfUtil.getString("init.log.base.url"));
 
     private static int sleepInterval = ConfUtil.getInt("spider.sleep.time");
 
@@ -82,20 +82,15 @@ public class SpiderBase {
         log("==>> PRINT LIST " + title + " (" + list.size() + ") <<== END >>>>>>>>");
     }
 
-    public static void logToFile(String fileSuffix, String msg) {
+    public static void logToFile(String fileName, String msg) {
         try {
             File parentFile = logFile.getParentFile();
             if (!parentFile.isDirectory()) {
                 parentFile.mkdirs();
             }
-            String filename = logFile.getName();
-            int dotIndex = filename.lastIndexOf(".");
-            File curlogFile = logFile;
-            if (null != fileSuffix && fileSuffix.length() > 0) {
-                curlogFile = new File(logFile.getParent(), filename.substring(0, dotIndex) + "_" + fileSuffix + filename.substring(dotIndex));
-            }
+            File curlogFile = new File(logFile, fileName);
             FileUtils.writeStringToFile(curlogFile, msg + "\n", "UTF-8", true);
-            System.out.println("[" + fileSuffix + "] " + msg);
+            System.out.println("[" + fileName + "] " + msg);
         } catch (IOException e) {
             System.out.println("[LOG TO FILE ERROR] " + msg);
         }

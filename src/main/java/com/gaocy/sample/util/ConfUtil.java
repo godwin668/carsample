@@ -18,12 +18,15 @@ public class ConfUtil {
     public static Configuration config;
 
     static {
-        Configurations configs = new Configurations();
         try {
-            config = configs.properties(new File("conf.properties"));
-            // access configuration properties
-        } catch (ConfigurationException cex) {
-            // Something went wrong
+            Parameters params = new Parameters();
+            FileBasedConfigurationBuilder<FileBasedConfiguration> builder =
+                    new FileBasedConfigurationBuilder<FileBasedConfiguration>(PropertiesConfiguration.class)
+                            .configure(params.properties().setEncoding("UTF-8")
+                                    .setFileName("conf.properties"));
+            config = builder.getConfiguration();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

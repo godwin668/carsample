@@ -3,6 +3,7 @@ package com.gaocy.sample.spider.impl;
 import com.gaocy.sample.spider.Spider;
 import com.gaocy.sample.spider.SpiderBase;
 import com.gaocy.sample.spider.SpiderEnum;
+import com.gaocy.sample.util.SenderUtil;
 import com.gaocy.sample.vo.InfoVo;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -33,10 +34,14 @@ public class GuaziSpider extends SpiderBase implements Spider {
         List<InfoVo> infoList = new ArrayList<InfoVo>();
         String url = baseUrl.replaceFirst("<city>", city);
         int pageCount = getPageCount(url);
+        pageCount = 2;
         for (int i = 1; i <= pageCount; i++) {
             String listUrl = url.replaceFirst("<page>", "" + i);
             Document doc = getDoc(listUrl);
             Elements infoElements = doc.select(".list ul li");
+            if (null == infoElements || infoElements.size() < 1) {
+                SenderUtil.sendMessage(SenderUtil.MessageLevel.ERROR, "listurl: " + listUrl + ", doc: " + doc);
+            }
             for (Element infoElement : infoElements) {
                 try {
                     String infoName = infoElement.select(".list-infoBox .infoBox a").get(0).text();
@@ -57,10 +62,11 @@ public class GuaziSpider extends SpiderBase implements Spider {
                     vo.setMileage(infoMileage);
                     vo.setPrice(infoPrice);
                     vo.setAddress(infoHref);
-                    logToFile("guazi", vo.toString());
+                    infoList.add(vo);
+                    logToFile("guazi.txt", vo.toString());
                 } catch (Exception e) {
                     e.printStackTrace();
-                    logToFile("error", e.toString());
+                    logToFile("error.txt", e.toString());
                 }
             }
         }
@@ -72,6 +78,9 @@ public class GuaziSpider extends SpiderBase implements Spider {
         int pageCount = 0;
         Document doc = getDoc(url);
         Elements pageLinkElements = doc.select(".pageBox .pageLink a span");
+        if (null == pageLinkElements || pageLinkElements.size() < 1) {
+            SenderUtil.sendMessage(SenderUtil.MessageLevel.ERROR, "listurl: " + url + ", doc: " + doc);
+        }
         for (Element pageLinkElement : pageLinkElements) {
             String pageData = pageLinkElement.text();
             if (null != pageData && pageData.matches("\\d+")) {

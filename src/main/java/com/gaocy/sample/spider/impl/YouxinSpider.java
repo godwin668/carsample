@@ -8,6 +8,8 @@
 
 package com.gaocy.sample.spider.impl;
 
+import com.gaocy.sample.spider.SpiderEnum;
+import com.gaocy.sample.util.SenderUtil;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -25,64 +27,78 @@ import java.util.*;
  */
 public class YouxinSpider extends SpiderBase implements Spider {
 
-    protected static File logFile = new File("/Users/Godwin/car.log");
-    private static DateFormat dfYYYYMMDD = new SimpleDateFormat("yyyyMMdd");
+    private static String baseUrl = "http://www.xin.com/<city>/s/i<page>/";
 
     public YouxinSpider(String[] cityArr) {
         super(cityArr);
     }
 
+    /**
+     * get all info in current city
+     *
+     * @param city
+     * @return
+     */
     @Override
     public List<InfoVo> listByCity(String city) {
-        return null;
-    }
-
-    public static void main(String[] args) {
-        String baseUrl = "http://www.xin.com";
-        String uri = "/beijing/s/i1/";  // sn_k0-1, 1-3, 3-6, 6-10, 10-20, 20-
-
-        String[] cityUriSubArr = {"beijing", "shanghai", "guangzhou"};      // 城市
-        String[] lileageUriSubArr = {"sn_k0-1", "sn_k1-3", "sn_k3-6", "sn_k6-10", "sn_k10-20", "sn_k20-"};  // 里程
-
-        for (String cityUriSub : cityUriSubArr) {
-            for (String lileageUriSub : lileageUriSubArr) {                     // 循环所有里程
-                String url = baseUrl + uri;
-                url = url.replaceFirst("s", lileageUriSub);
-                url = url.replaceFirst("beijing", cityUriSub);
-                int pageCount = getPageCount(url);
-                System.out.println("max page: " + pageCount);
-
-                List<Integer> carIdAllList = new ArrayList<Integer>();
-                Set<Integer> carIdAllSet = new TreeSet<Integer>();
-
-                for (int i = 1; i <= pageCount; i++) {                          // 循环所有页
-                    String mileageUrl = url.replaceFirst("i1", "i" + i);
-                    List<Integer> carIdList = getCarId(mileageUrl);
-                    carIdAllList.addAll(carIdList);
-                    carIdAllSet.addAll(carIdList);
-                    // logToFile(uri, "page " + i);
-                    // logToFile(uri, JSON.toJSONString(carIdList));
-                    System.out.println("page " + i + " of " + pageCount + ", url: " + mileageUrl);
-                    System.out.println(carIdList);
+        List<InfoVo> infoList = new ArrayList<InfoVo>();
+        String url = baseUrl.replaceFirst("<city>", city);
+        String[] mileageUriSubArr = {"sn_k0-1", "sn_k1-3", "sn_k3-6", "sn_k6-10", "sn_k10-20", "sn_k20-"};  // 里程
+        for (String mileageUriSub : mileageUriSubArr) {                     // 循环所有里程
+            String mileageUrl = url.replaceFirst("s", mileageUriSub);
+            int pageCount = getPageCount(mileageUrl);
+            for (int i = 1; i <= pageCount; i++) {
+                String listUrl = url.replaceFirst("<page>", "" + i);
+                Document doc = getDoc(listUrl);
+                Elements infoElements = doc.select(".list-con").get(0).select(".con");
+                if (null == infoElements || infoElements.size() < 1) {
+                    SenderUtil.sendMessage(SenderUtil.MessageLevel.ERROR, "listurl: " + listUrl + ", doc: " + doc);
                 }
+                for (Element infoElement : infoElements) {
+                    try {
+                        String infoHref = infoElement.select(".aimg").get(0).attr("href");
+                        String hrefRegex = ".*?(\\d+).html";
+                        String infoId = infoHref.replaceFirst(hrefRegex, "$1");
 
-                StringBuffer carIdAllStr = new StringBuffer();
-                for (Integer carId : carIdAllSet) {
-                    carIdAllStr.append("," + carId);
+
+
+                        String infoName = infoElement.select(".list-infoBox .infoBox a").get(0).text();
+                        String infoCity = infoHref.replaceFirst("/(\\w+)/(\\w+).htm", "$1");
+
+                        String infoRegDate = infoElement.select(".list-infoBox .fc-gray span").get(0).text().replaceAll("上牌", "");
+                        String infoMileageStr = infoElement.select(".list-infoBox .fc-gray").get(0).text();
+                        String infoMileage = infoMileageStr.substring(infoMileageStr.indexOf("行驶") + 2);
+                        String infoPrice = infoElement.select(".list-infoBox .priType-s .priType").get(0).text();
+
+                        InfoVo vo = new InfoVo();
+                        vo.setSrc(SpiderEnum.GUAZI);
+                        vo.setCity(infoCity);
+                        vo.setSrcId(infoId);
+                        vo.setName(infoName);
+                        vo.setRegDate(infoRegDate);
+                        vo.setMileage(infoMileage);
+                        vo.setPrice(infoPrice);
+                        vo.setAddress(infoHref);
+                        infoList.add(vo);
+                        logToFile("guazi.txt", vo.toString());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        logToFile("error.txt", e.toString());
+                    }
                 }
-                if (carIdAllStr.length() == 0) {
-                    carIdAllStr.append(",");
-                }
-                logToFile("/xin/" + dfYYYYMMDD.format(new Date()) + "_" + cityUriSub + "_ids", carIdAllStr.substring(1));
-                logToFile("/xin/" + dfYYYYMMDD.format(new Date()) + "_" + cityUriSub + "_sum", "" + carIdAllSet.size());
             }
         }
+        return infoList;
     }
 
     public static int getPageCount(String url) {
+        url = url.replaceFirst("<page>", "1");
         int pageCount = 0;
         Document doc = getDoc(url);
         Elements pageLinkElements = doc.select(".search_page_link a");
+        if (null == pageLinkElements || pageLinkElements.size() < 1) {
+            SenderUtil.sendMessage(SenderUtil.MessageLevel.ERROR, "listurl: " + url + ", doc: " + doc);
+        }
         for (Element pageLinkElement : pageLinkElements) {
             String pageData = pageLinkElement.attr("data-page");
             if (null != pageData && pageData.matches("\\d+")) {
@@ -93,30 +109,5 @@ public class YouxinSpider extends SpiderBase implements Spider {
             }
         }
         return pageCount;
-    }
-
-    public static List<Integer> getCarId(String url) {
-        Document doc = getDoc(url);
-        List<Integer> idList = new ArrayList<Integer>();
-        Elements carElements = doc.select(".list-con").get(0).select(".con");
-        for (Element carElement : carElements) {
-            // System.out.println(carElement.text());
-            Elements carIconElements = carElement.select(".ico1-new");
-            String href = carElement.select(".aimg").get(0).attr("href");
-            // System.out.println("href: " + href);
-            String hrefRegex = ".*?(\\d+).html";
-            if (null != href && href.matches(hrefRegex)) {
-                String carId = href.replaceFirst(hrefRegex, "$1");
-                idList.add(Integer.valueOf(carId));
-            }
-            /*
-            if (null != carIconElements && carIconElements.size() > 0) {
-                System.out.println("new car.");
-            } else {
-                System.out.println("old car");
-            }
-            */
-        }
-        return idList;
     }
 }
