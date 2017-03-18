@@ -22,6 +22,36 @@ public enum CityEnum {
         this.py = py;
     }
 
+    public static CityEnum getByName(String name) {
+        CityEnum[] cityEnumArr = CityEnum.values();
+        for (CityEnum cityEnum : cityEnumArr) {
+            if (cityEnum.getName().equalsIgnoreCase(name)) {
+                return cityEnum;
+            }
+        }
+        return null;
+    }
+
+    public static CityEnum getByPinyin(String pinyin) {
+        CityEnum[] cityEnumArr = CityEnum.values();
+        for (CityEnum cityEnum : cityEnumArr) {
+            if (cityEnum.getPinyin().equalsIgnoreCase(pinyin)) {
+                return cityEnum;
+            }
+        }
+        return null;
+    }
+
+    public static CityEnum getByPY(String py) {
+        CityEnum[] cityEnumArr = CityEnum.values();
+        for (CityEnum cityEnum : cityEnumArr) {
+            if (cityEnum.getPy().equalsIgnoreCase(py)) {
+                return cityEnum;
+            }
+        }
+        return null;
+    }
+
     public String getName() {
         return name;
     }
@@ -54,5 +84,9 @@ public enum CityEnum {
     public static void main(String[] args) {
         System.out.println(CityEnum.beijing);
         System.out.println(CityEnum.beijing == CityEnum.valueOf("beijing"));
+
+        System.out.println(CityEnum.beijing == CityEnum.getByName("北京"));
+        System.out.println(CityEnum.beijing == CityEnum.getByPinyin("beijing"));
+        System.out.println(CityEnum.beijing == CityEnum.getByPY("bj"));
     }
 }

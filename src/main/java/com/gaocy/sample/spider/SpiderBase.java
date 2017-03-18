@@ -60,13 +60,14 @@ public class SpiderBase {
         if (null != doc) {
             return doc;
         } else {
-            logToFile("getdocerr", "url: " + url);
+            logToFile("error", "getDoc error url: " + url);
             return null;
         }
     }
 
     static Document getDocException(String url) throws Exception {
         Thread.sleep(sleepInterval);
+        logToFile("getdocurl", url);
         Document doc = Jsoup.connect(url)
                 .userAgent(UserAgentUtil.get())
                 .ignoreContentType(true)
@@ -97,6 +98,7 @@ public class SpiderBase {
 
     public static void logToFile(String fileName, String msg) {
         try {
+            fileName = fileName.contains(".") ? fileName : (fileName + ".txt");
             File parentFile = logFile.getParentFile();
             if (!parentFile.isDirectory()) {
                 parentFile.mkdirs();
@@ -105,7 +107,7 @@ public class SpiderBase {
             FileUtils.writeStringToFile(curlogFile, msg + "\n", "UTF-8", true);
             System.out.println("[" + fileName + "] " + msg);
         } catch (IOException e) {
-            System.out.println("[LOG TO FILE ERROR] " + msg);
+            System.err.println("[LOG TO FILE ERROR] " + msg);
         }
     }
 

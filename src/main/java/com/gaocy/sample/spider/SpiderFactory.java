@@ -17,5 +17,4 @@ public class SpiderFactory {
             return null;
         }
     }
-
 }

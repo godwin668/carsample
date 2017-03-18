@@ -45,7 +45,7 @@ public class SpiderRunner<T extends List<InfoVo>> implements Callable {
 
     public void callback(List<InfoVo> list) {
         for (InfoVo vo : list) {
-            SpiderBase.logToFile("rawsample/" + vo.getSrc().name() + "/" + dfDate.format(new Date()) + ".txt", JSON.toJSONString(vo));
+            SpiderBase.logToFile("rawsample/" + vo.getSrc().name() + "/" + dfDate.format(new Date()), JSON.toJSONString(vo));
         }
     }
 }

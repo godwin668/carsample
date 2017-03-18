@@ -15,7 +15,7 @@ public class SenderUtil {
 
     public static void sendMessage(MessageLevel level, String message) {
         // TODO
-        SpiderBase.logToFile("error.txt", "[" + level + "] " + message);
+        SpiderBase.logToFile("error", "[" + level + "] " + message);
         System.err.println("[" + level + "] " + message);
     }
 

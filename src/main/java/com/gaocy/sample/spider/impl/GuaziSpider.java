@@ -41,7 +41,7 @@ public class GuaziSpider extends SpiderBase implements Spider {
             Document doc = getDoc(listUrl);
             Elements infoElements = doc.select(".list ul li");
             if (null == infoElements || infoElements.size() < 1) {
-                SenderUtil.sendMessage(SenderUtil.MessageLevel.ERROR, "listurl: " + listUrl + ", doc: " + doc);
+                SenderUtil.sendMessage(SenderUtil.MessageLevel.ERROR, "listByCity: " + listUrl);
             }
             for (Element infoElement : infoElements) {
                 try {
@@ -60,7 +60,7 @@ public class GuaziSpider extends SpiderBase implements Spider {
 
                     InfoVo vo = new InfoVo();
                     vo.setSrc(SpiderEnum.guazi);
-                    vo.setCity(infoCity);
+                    vo.setCity(CityEnum.getByPY(infoCity).getPinyin());
                     vo.setSrcId(infoId);
                     vo.setName(infoName);
                     vo.setRegDate(infoRegDate);
@@ -68,10 +68,10 @@ public class GuaziSpider extends SpiderBase implements Spider {
                     vo.setPrice(infoPrice);
                     vo.setAddress(infoHref);
                     infoList.add(vo);
-                    logToFile("guazi.txt", vo.toString());
+                    logToFile("guazi", vo.toString());
                 } catch (Exception e) {
                     e.printStackTrace();
-                    logToFile("error.txt", e.toString());
+                    logToFile("error", e.toString());
                 }
             }
         }
@@ -80,11 +80,11 @@ public class GuaziSpider extends SpiderBase implements Spider {
 
     public static int getPageCount(String url) {
         url = url.replaceFirst("<page>", "1");
-        int pageCount = 0;
+        int pageCount = 1;
         Document doc = getDoc(url);
         Elements pageLinkElements = doc.select(".pageBox .pageLink a span");
         if (null == pageLinkElements || pageLinkElements.size() < 1) {
-            SenderUtil.sendMessage(SenderUtil.MessageLevel.ERROR, "listurl: " + url + ", doc: " + doc);
+            SenderUtil.sendMessage(SenderUtil.MessageLevel.ERROR, "getPageCount: " + url);
         }
         for (Element pageLinkElement : pageLinkElements) {
             String pageData = pageLinkElement.text();

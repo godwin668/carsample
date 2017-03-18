@@ -45,15 +45,15 @@ public class YouxinSpider extends SpiderBase implements Spider {
         String[] mileageUriSubArr = {"sn_k0-1", "sn_k1-3", "sn_k3-6", "sn_k6-10", "sn_k10-20", "sn_k20-"};  // 里程
         String regDateAndMileageRegex = "上牌(.*?)｜里程(.*?公里)";
         for (String mileageUriSub : mileageUriSubArr) {                     // 循环所有里程
-            String mileageUrl = url.replaceFirst("s", mileageUriSub);
+            String mileageUrl = url.replaceFirst("/s/", "/" + mileageUriSub + "/");
             int pageCount = getPageCount(mileageUrl);
             pageCount = 1;
             for (int i = 1; i <= pageCount; i++) {
-                String listUrl = url.replaceFirst("<page>", "" + i);
-                Document doc = getDoc(listUrl);
+                String mileagePageUrl = mileageUrl.replaceFirst("<page>", "" + i);
+                Document doc = getDoc(mileagePageUrl);
                 Elements infoElements = doc.select(".list-con").get(0).select(".con");
                 if (null == infoElements || infoElements.size() < 1) {
-                    SenderUtil.sendMessage(SenderUtil.MessageLevel.ERROR, "listurl: " + listUrl + ", doc: " + doc);
+                    SenderUtil.sendMessage(SenderUtil.MessageLevel.ERROR, "listByCity: " + mileagePageUrl);
                 }
                 for (Element infoElement : infoElements) {
                     try {
@@ -71,7 +71,7 @@ public class YouxinSpider extends SpiderBase implements Spider {
 
                         InfoVo vo = new InfoVo();
                         vo.setSrc(SpiderEnum.youxin);
-                        vo.setCity(infoCity);
+                        vo.setCity(CityEnum.getByPinyin(infoCity).getPinyin());
                         vo.setSrcId(infoId);
                         vo.setName(infoName);
                         vo.setRegDate(infoRegDate);
@@ -79,10 +79,10 @@ public class YouxinSpider extends SpiderBase implements Spider {
                         vo.setPrice(infoPrice);
                         vo.setAddress(infoHref);
                         infoList.add(vo);
-                        logToFile("youxin.txt", vo.toString());
+                        logToFile("youxin", vo.toString());
                     } catch (Exception e) {
                         e.printStackTrace();
-                        logToFile("error.txt", e.toString());
+                        logToFile("error", e.toString());
                     }
                 }
             }
@@ -92,11 +92,11 @@ public class YouxinSpider extends SpiderBase implements Spider {
 
     public static int getPageCount(String url) {
         url = url.replaceFirst("<page>", "1");
-        int pageCount = 0;
+        int pageCount = 1;
         Document doc = getDoc(url);
         Elements pageLinkElements = doc.select(".search_page_link a");
         if (null == pageLinkElements || pageLinkElements.size() < 1) {
-            SenderUtil.sendMessage(SenderUtil.MessageLevel.ERROR, "listurl: " + url + ", doc: " + doc);
+            SenderUtil.sendMessage(SenderUtil.MessageLevel.ERROR, "getPageCount: " + url);
         }
         for (Element pageLinkElement : pageLinkElements) {
             String pageData = pageLinkElement.attr("data-page");
