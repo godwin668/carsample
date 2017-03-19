@@ -1,6 +1,6 @@
 package com.gaocy.sample.dao;
 
-import com.gaocy.sample.vo.InfoVo;
+import com.gaocy.sample.vo.CarVo;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
@@ -116,7 +116,7 @@ public interface CarDao {
 	 * @param includeDeleted whether include deleted doc
 	 * @return
 	 */
-	InfoVo get(String rid, boolean includeDeleted) throws Exception;
+	CarVo get(String rid, boolean includeDeleted) throws Exception;
 	
 	/**
 	 * List Application documents
@@ -132,5 +132,5 @@ public interface CarDao {
 	 * @return
 	 * @throws Exception
 	 */
-	List<InfoVo> list(String app, int offset, int limit, String labelId, String searchString, QueryOrder queryOrder, int status) throws Exception;
+	List<CarVo> list(String app, int offset, int limit, String labelId, String searchString, QueryOrder queryOrder, int status) throws Exception;
 }

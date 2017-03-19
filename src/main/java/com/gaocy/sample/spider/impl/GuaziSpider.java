@@ -5,7 +5,7 @@ import com.gaocy.sample.spider.SpiderBase;
 import com.gaocy.sample.spider.SpiderEnum;
 import com.gaocy.sample.util.SenderUtil;
 import com.gaocy.sample.vo.CityEnum;
-import com.gaocy.sample.vo.InfoVo;
+import com.gaocy.sample.vo.CarVo;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -31,8 +31,8 @@ public class GuaziSpider extends SpiderBase implements Spider {
      * @return
      */
     @Override
-    public List<InfoVo> listByCity(CityEnum city) {
-        List<InfoVo> infoList = new ArrayList<InfoVo>();
+    public List<CarVo> listByCity(CityEnum city) {
+        List<CarVo> infoList = new ArrayList<CarVo>();
         String url = baseUrl.replaceFirst("<city>", city.getPy());
         int pageCount = getPageCount(url);
         pageCount = 2;
@@ -58,7 +58,7 @@ public class GuaziSpider extends SpiderBase implements Spider {
                     String infoMileage = infoMileageStr.substring(infoMileageStr.indexOf("行驶") + 2);
                     String infoPrice = infoElement.select(".list-infoBox .priType-s .priType").get(0).text();
 
-                    InfoVo vo = new InfoVo();
+                    CarVo vo = new CarVo();
                     vo.setSrc(SpiderEnum.guazi);
                     vo.setCity(CityEnum.getByPY(infoCity).getPinyin());
                     vo.setSrcId(infoId);

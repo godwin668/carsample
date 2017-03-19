@@ -1,7 +1,7 @@
 package com.gaocy.sample.dao.impl;
 
 import com.gaocy.sample.dao.CarDao;
-import com.gaocy.sample.vo.InfoVo;
+import com.gaocy.sample.vo.CarVo;
 import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DBCollection;
 import org.springframework.beans.factory.InitializingBean;
@@ -48,12 +48,12 @@ public class CarDaoImpl extends BaseDaoImpl implements CarDao, InitializingBean 
 	}
 
 	@Override
-	public InfoVo get(String rid, boolean includeDeleted) throws Exception {
+	public CarVo get(String rid, boolean includeDeleted) throws Exception {
 		return null;
 	}
 
 	@Override
-	public List<InfoVo> list(String app, int offset, int limit, String labelId, String searchString, QueryOrder queryOrder, int status) throws Exception {
+	public List<CarVo> list(String app, int offset, int limit, String labelId, String searchString, QueryOrder queryOrder, int status) throws Exception {
 		return null;
 	}
 }

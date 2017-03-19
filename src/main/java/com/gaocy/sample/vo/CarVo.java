@@ -6,7 +6,7 @@ import com.gaocy.sample.spider.SpiderEnum;
 /**
  * Created by godwin on 2017-03-16.
  */
-public class InfoVo {
+public class CarVo {
     private SpiderEnum src;
     private String id;
     private String srcId;
