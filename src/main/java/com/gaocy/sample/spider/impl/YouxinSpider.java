@@ -3,8 +3,8 @@ package com.gaocy.sample.spider.impl;
 import com.gaocy.sample.spider.Spider;
 import com.gaocy.sample.spider.SpiderBase;
 import com.gaocy.sample.spider.SpiderEnum;
+import com.gaocy.sample.util.CityUtil;
 import com.gaocy.sample.util.SenderUtil;
-import com.gaocy.sample.vo.CityEnum;
 import com.gaocy.sample.vo.CarVo;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -27,13 +27,13 @@ public class YouxinSpider extends SpiderBase implements Spider {
     /**
      * get all info in current city
      *
-     * @param city
+     * @param cityName
      * @return
      */
     @Override
-    public List<CarVo> listByCity(CityEnum city) {
+    public List<CarVo> listByCityName(String cityName) {
         List<CarVo> infoList = new ArrayList<CarVo>();
-        String url = baseUrl.replaceFirst("<city>", city.getPinyin());
+        String url = baseUrl.replaceFirst("<city>", CityUtil.getEName(SpiderEnum.youxin, cityName));
         String[] mileageUriSubArr = {"sn_k0-1", "sn_k1-3", "sn_k3-6", "sn_k6-10", "sn_k10-20", "sn_k20-"};  // 里程
         String regDateAndMileageRegex = "上牌(.*?)｜里程(.*?公里)";
         for (String mileageUriSub : mileageUriSubArr) {                     // 循环所有里程
@@ -63,7 +63,7 @@ public class YouxinSpider extends SpiderBase implements Spider {
 
                         CarVo vo = new CarVo();
                         vo.setSrc(SpiderEnum.youxin);
-                        vo.setCity(CityEnum.getByPinyin(infoCity).getPinyin());
+                        vo.setCity(CityUtil.getName(SpiderEnum.youxin, infoCity));
                         vo.setSrcId(infoId);
                         vo.setName(infoName);
                         vo.setRegDate(infoRegDate);

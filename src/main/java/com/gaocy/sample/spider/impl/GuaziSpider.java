@@ -3,8 +3,8 @@ package com.gaocy.sample.spider.impl;
 import com.gaocy.sample.spider.Spider;
 import com.gaocy.sample.spider.SpiderBase;
 import com.gaocy.sample.spider.SpiderEnum;
+import com.gaocy.sample.util.CityUtil;
 import com.gaocy.sample.util.SenderUtil;
-import com.gaocy.sample.vo.CityEnum;
 import com.gaocy.sample.vo.CarVo;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -27,13 +27,13 @@ public class GuaziSpider extends SpiderBase implements Spider {
     /**
      * get all info in current city
      *
-     * @param city
+     * @param cityName
      * @return
      */
     @Override
-    public List<CarVo> listByCity(CityEnum city) {
+    public List<CarVo> listByCityName(String cityName) {
         List<CarVo> infoList = new ArrayList<CarVo>();
-        String url = baseUrl.replaceFirst("<city>", city.getPy());
+        String url = baseUrl.replaceFirst("<city>", CityUtil.getEName(SpiderEnum.guazi, cityName));
         int pageCount = getPageCount(url);
         pageCount = 2;
         for (int i = 1; i <= pageCount; i++) {
@@ -60,7 +60,7 @@ public class GuaziSpider extends SpiderBase implements Spider {
 
                     CarVo vo = new CarVo();
                     vo.setSrc(SpiderEnum.guazi);
-                    vo.setCity(CityEnum.getByPY(infoCity).getPinyin());
+                    vo.setCity(CityUtil.getName(SpiderEnum.guazi, infoCity));
                     vo.setSrcId(infoId);
                     vo.setName(infoName);
                     vo.setRegDate(infoRegDate);

@@ -1,6 +1,5 @@
 package com.gaocy.sample.spider;
 
-import com.gaocy.sample.vo.CityEnum;
 import com.gaocy.sample.vo.CarVo;
 
 import java.util.List;
@@ -10,8 +9,8 @@ import java.util.List;
  */
 public interface Spider {
 
-    public CityEnum[] getCityArr();
+    public String[] getCityNameArr();
 
-    List<CarVo> listByCity(CityEnum city);
+    List<CarVo> listByCityName(String cityName);
 
 }

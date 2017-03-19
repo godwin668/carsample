@@ -1,8 +1,10 @@
 package com.gaocy.sample.util;
 
 import com.gaocy.sample.spider.SpiderEnum;
+import org.apache.commons.configuration2.Configuration;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -10,41 +12,64 @@ import java.util.Map;
  */
 public class CityUtil {
 
-    private static Map<SpiderEnum, Map<String, String>> spiderCityMap = new HashMap<SpiderEnum, Map<String, String>>();
+    // 城市中文名称-城市英文名称
+    private static Map<SpiderEnum, Map<String, String>> spiderCityZH2ENMap = new HashMap<SpiderEnum, Map<String, String>>();
+
+    // 城市英文名称-城市中文名称
+    private static Map<SpiderEnum, Map<String, String>> spiderCityEN2ZHMap = new HashMap<SpiderEnum, Map<String, String>>();
 
     static {
-        // 瓜子
-        Map<String, String> guaziMap = new HashMap<String, String>();
-        spiderCityMap.put(SpiderEnum.guazi, guaziMap);
-        String[] guaziCityArr = ConfUtil.getString("city.map.guazi").split(",");
-        for (String guaziCity : guaziCityArr) {
-            String[] guaziCityKV = guaziCity.split("-");
-            guaziMap.put(guaziCityKV[0], guaziCityKV[1]);
-        }
-
-        // 优信
-        Map<String, String> youxinMap = new HashMap<String, String>();
-        spiderCityMap.put(SpiderEnum.youxin, youxinMap);
-        String[] youxinCityArr = ConfUtil.getString("city.map.youxin").split(",");
-        for (String youxinCity : youxinCityArr) {
-            String[] youxinCityKV = youxinCity.split("-");
-            youxinMap.put(youxinCityKV[0], youxinCityKV[1]);
+        for (SpiderEnum spider : SpiderEnum.values()) {
+            Map<String, String> cityZH2ENMap = new HashMap<String, String>();
+            spiderCityZH2ENMap.put(spider, cityZH2ENMap);
+            Map<String, String> cityEN2ZHMap = new HashMap<String, String>();
+            spiderCityEN2ZHMap.put(spider, cityEN2ZHMap);
+            Configuration cityConf = ConfUtil.getConfByName("city/" + spider.name() + ".properties");
+            Iterator<String> cityKeys = cityConf.getKeys();
+            while (cityKeys.hasNext()) {
+                String cityName = cityKeys.next();
+                String cityValue = cityConf.getString(cityName);
+                cityZH2ENMap.put(cityName, cityValue);
+                cityEN2ZHMap.put(cityValue, cityName);
+            }
         }
     }
 
-    public static String get(SpiderEnum spider, String cityName) {
+    /**
+     * 根据城市中文名称获取英文名称
+     *
+     * @param spider
+     * @param cityName
+     * @return
+     */
+    public static String getEName(SpiderEnum spider, String cityName) {
         try {
-            return spiderCityMap.get(spider).get(cityName);
+            return spiderCityZH2ENMap.get(spider).get(cityName);
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    /**
+     * 根据城市英文名称获取中文名称
+     *
+     * @param spider
+     * @param cityEName
+     * @return
+     */
+    public static String getName(SpiderEnum spider, String cityEName) {
+        try {
+            return spiderCityEN2ZHMap.get(spider).get(cityEName);
         } catch (Exception e) {
             return "";
         }
     }
 
     public static void main(String[] args) {
-        System.out.println(ConfUtil.getString("city.map.guazi"));
+        System.out.println(SpiderEnum.guazi + ": " + getEName(SpiderEnum.guazi, "北京"));
+        System.out.println(SpiderEnum.guazi + ": " + getName(SpiderEnum.guazi, "bj"));
 
-        System.out.println(SpiderEnum.guazi + ": " + get(SpiderEnum.guazi, "北京"));
-        System.out.println(SpiderEnum.youxin + ": " + get(SpiderEnum.youxin, "北京"));
+        System.out.println("pinyin: " + PinyinUtil.getPinYin("北京"));
 
     }
 }

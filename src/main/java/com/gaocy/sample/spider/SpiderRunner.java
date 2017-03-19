@@ -2,7 +2,6 @@ package com.gaocy.sample.spider;
 
 import com.alibaba.fastjson.JSON;
 import com.gaocy.sample.util.ConfUtil;
-import com.gaocy.sample.vo.CityEnum;
 import com.gaocy.sample.vo.CarVo;
 
 import java.text.DateFormat;
@@ -33,10 +32,10 @@ public class SpiderRunner<T extends List<CarVo>> implements Callable {
 
     @Override
     public T call() throws Exception {
-        CityEnum[] cityArr = spider.getCityArr();
+        String[] cityNameArr = spider.getCityNameArr();
         T infoAllList = (T) new ArrayList<CarVo>();
-        for (CityEnum city : cityArr) {
-            List<CarVo> infoList = spider.listByCity(city);
+        for (String cityName : cityNameArr) {
+            List<CarVo> infoList = spider.listByCityName(cityName);
             infoAllList.addAll(infoList);
         }
         callback(infoAllList);
