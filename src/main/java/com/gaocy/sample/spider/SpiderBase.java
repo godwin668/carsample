@@ -97,7 +97,7 @@ public class SpiderBase {
                 parentFile.mkdirs();
             }
             File curlogFile = new File(logFile, fileName);
-            FileUtils.writeStringToFile(curlogFile, msg + "\n", "UTF-8", true);
+            FileUtils.writeStringToFile(curlogFile, msg + "\r\n", "UTF-8", true);
             System.out.println("[" + fileName + "] " + msg);
         } catch (IOException e) {
             System.err.println("[LOG TO FILE ERROR] " + msg);
