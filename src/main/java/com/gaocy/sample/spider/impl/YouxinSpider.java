@@ -1,11 +1,3 @@
-/*
- * Copyright (c) I Doc View. 北京卓软在线信息技术有限公司. All rights reserved.
- * 项目名称：I Doc View在线文档预览系统
- * 文件名称：YouxinStat.java
- * Date：20150101
- * Author: godwin
- */
-
 package com.gaocy.sample.spider.impl;
 
 import com.gaocy.sample.spider.Spider;
