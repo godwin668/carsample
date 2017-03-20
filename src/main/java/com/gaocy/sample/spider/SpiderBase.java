@@ -10,6 +10,9 @@ import org.jsoup.nodes.Document;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -22,6 +25,8 @@ public class SpiderBase {
     private static int sleepInterval = ConfUtil.getInt("spider.sleep.time");
 
     String[] cityNameArr;
+
+    private static DateFormat dfDateTime = new SimpleDateFormat("yyyyMMddHHmmss");
 
     public SpiderBase(String[] cityNameArr) {
         this.cityNameArr = cityNameArr;
@@ -60,7 +65,7 @@ public class SpiderBase {
 
     static Document getDocException(String url) throws Exception {
         Thread.sleep(sleepInterval);
-        logToFile("getdocurl", url);
+        logToFile("getdocurl", dfDateTime.format(new Date()) + " " + url);
         Document doc = Jsoup.connect(url)
                 .userAgent(UserAgentUtil.get())
                 .ignoreContentType(true)
