@@ -62,8 +62,8 @@ public class GuaziSpider extends SpiderBase implements Spider {
                         infoRegDate = infoRegDate.replaceFirst("(\\d{4})(\\d{1})", "$10$2");
                     }
                     String infoMileageStr = infoElement.select(".list-infoBox .fc-gray").get(0).text();
-                    String infoMileage = infoMileageStr.substring(infoMileageStr.indexOf("行驶") + 2);
-                    String infoPrice = infoElement.select(".list-infoBox .priType-s .priType").get(0).text();
+                    String infoMileage = infoMileageStr.substring(infoMileageStr.indexOf("行驶") + 2).replaceAll("万公里", "");
+                    String infoPrice = infoElement.select(".list-infoBox .priType-s .priType").get(0).text().replaceAll("万", "");
 
                     CarVo vo = new CarVo();
                     vo.setSrc(SpiderEnum.guazi);

@@ -35,7 +35,7 @@ public class YouxinSpider extends SpiderBase implements Spider {
         List<CarVo> infoList = new ArrayList<CarVo>();
         String url = baseUrl.replaceFirst("<city>", CityUtil.getEName(SpiderEnum.youxin, cityName));
         String[] mileageUriSubArr = {"sn_k0-1", "sn_k1-3", "sn_k3-6", "sn_k6-10", "sn_k10-20", "sn_k20-"};  // 里程
-        String regDateAndMileageRegex = "上牌(.*?)｜里程(.*?公里)";
+        String regDateAndMileageRegex = "上牌(.*?)｜里程(.*?)万公里";
         for (String mileageUriSub : mileageUriSubArr) {                     // 循环所有里程
             String mileageUrl = url.replaceFirst("/s/", "/" + mileageUriSub + "/");
             int pageCount = getPageCount(mileageUrl);
@@ -58,7 +58,7 @@ public class YouxinSpider extends SpiderBase implements Spider {
                         String infoRegDate = regDateAndMileageStr.replaceFirst(regDateAndMileageRegex, "$1").replaceFirst("/", "");
                         String infoMileage = regDateAndMileageStr.replaceFirst(regDateAndMileageRegex, "$2");
                         String infoPriceStr = infoPadElement.select("p").get(0).select("em").get(0).text();
-                        String infoPrice = infoPriceStr.replaceFirst("(.*?万).*", "$1");
+                        String infoPrice = infoPriceStr.replaceFirst("(.*?)万.*", "$1");
 
                         CarVo vo = new CarVo();
                         vo.setSrc(SpiderEnum.youxin);
