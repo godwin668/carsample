@@ -35,7 +35,6 @@ public class GuaziSpider extends SpiderBase implements Spider {
         List<CarVo> infoList = new ArrayList<CarVo>();
         String url = baseUrl.replaceFirst("<city>", CityUtil.getEName(SpiderEnum.guazi, cityName));
         int pageCount = getPageCount(url);
-        pageCount = 2;
         for (int i = 1; i <= pageCount; i++) {
             String listUrl = url.replaceFirst("<page>", "" + i);
             Document doc = getDoc(listUrl);

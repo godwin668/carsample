@@ -39,7 +39,6 @@ public class YouxinSpider extends SpiderBase implements Spider {
         for (String mileageUriSub : mileageUriSubArr) {                     // 循环所有里程
             String mileageUrl = url.replaceFirst("/s/", "/" + mileageUriSub + "/");
             int pageCount = getPageCount(mileageUrl);
-            pageCount = 1;
             for (int i = 1; i <= pageCount; i++) {
                 String mileagePageUrl = mileageUrl.replaceFirst("<page>", "" + i);
                 Document doc = getDoc(mileagePageUrl);
