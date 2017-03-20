@@ -35,7 +35,11 @@ public class GuaziSpider extends SpiderBase implements Spider {
         List<CarVo> infoList = new ArrayList<CarVo>();
         String url = baseUrl.replaceFirst("<city>", CityUtil.getEName(SpiderEnum.guazi, cityName));
         int pageCount = getPageCount(url);
+        boolean isOtherCity = false;
         for (int i = 1; i <= pageCount; i++) {
+            if (isOtherCity) {
+                break;
+            }
             String listUrl = url.replaceFirst("<page>", "" + i);
             Document doc = getDoc(listUrl);
             Elements infoElements = doc.select(".list ul li");
@@ -50,6 +54,10 @@ public class GuaziSpider extends SpiderBase implements Spider {
                     String infoId = infoHref.replaceFirst("/(\\w+)/(\\w+).htm", "$2");
                     String infoRegDateStr = infoElement.select(".list-infoBox .fc-gray span").get(0).text().replaceAll("上牌", "");
                     String infoRegDate = infoRegDateStr.replaceFirst("(\\d+)年(\\d+)月", "$1$2");
+                    if (infoRegDate.length() != 5 && infoRegDate.length() != 6) {
+                        isOtherCity = true;
+                        break;
+                    }
                     if (infoRegDate.length() == 5) {
                         infoRegDate = infoRegDate.replaceFirst("(\\d{4})(\\d{1})", "$10$2");
                     }
