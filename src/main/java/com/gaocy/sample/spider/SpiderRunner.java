@@ -1,6 +1,7 @@
 package com.gaocy.sample.spider;
 
 import com.alibaba.fastjson.JSON;
+import com.gaocy.sample.util.CityUtil;
 import com.gaocy.sample.util.ConfUtil;
 import com.gaocy.sample.vo.CarVo;
 

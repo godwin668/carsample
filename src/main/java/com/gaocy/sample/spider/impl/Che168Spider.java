@@ -17,11 +17,11 @@ import java.util.List;
 /**
  * Created by godwin on 2017-03-16.
  */
-public class GuaziSpider extends SpiderBase implements Spider {
+public class Che168Spider extends SpiderBase implements Spider {
 
-    private static String baseUrl = "https://www.guazi.com/<city>/buy/o<page>/";
+    private static String baseUrl = "http://www.che168.com/<city>/a0_0msdgscncgpi1ltocsp<page>exx0/";
 
-    public GuaziSpider(String[] cityArr) {
+    public Che168Spider(String[] cityArr) {
         super(cityArr);
     }
 
@@ -34,45 +34,34 @@ public class GuaziSpider extends SpiderBase implements Spider {
     @Override
     public List<CarVo> listByCityName(String cityName) {
         List<CarVo> infoList = new ArrayList<CarVo>();
-        String cityEName = CityUtil.getEName(SpiderEnum.guazi, cityName);
+        String cityEName = CityUtil.getEName(SpiderEnum.che168, cityName);
         if (StringUtils.isBlank(cityEName)) {
             return infoList;
         }
         String url = baseUrl.replaceFirst("<city>", cityEName);
         int pageCount = getPageCount(url);
-        boolean isOtherCity = false;
+        String mileageTimeCityRegex = "(.*?)万公里／(.*?)／(.*)";
         for (int i = 1; i <= pageCount; i++) {
-            if (isOtherCity) {
-                break;
-            }
             String listUrl = url.replaceFirst("<page>", "" + i);
             Document doc = getDoc(listUrl);
-            Elements infoElements = doc.select(".list ul li");
+            Elements infoElements = doc.select(".tab-content .list-photo ul li");
             if (null == infoElements || infoElements.size() < 1) {
                 SenderUtil.sendMessage(SenderUtil.MessageLevel.ERROR, "listByCity: " + listUrl);
             }
             for (Element infoElement : infoElements) {
                 try {
-                    String infoName = infoElement.select(".list-infoBox .infoBox a").get(0).text();
-                    String infoHref = infoElement.select(".list-infoBox .infoBox a").get(0).attr("href");
-                    String infoCity = infoHref.replaceFirst("/(\\w+)/(\\w+).htm", "$1");
-                    String infoId = infoHref.replaceFirst("/(\\w+)/(\\w+).htm", "$2");
-                    String infoRegDateStr = infoElement.select(".list-infoBox .fc-gray span").get(0).text().replaceAll("上牌", "");
-                    String infoRegDate = infoRegDateStr.replaceFirst("(\\d+)年(\\d+)月", "$1$2");
-                    if (infoRegDate.length() != 5 && infoRegDate.length() != 6) {
-                        isOtherCity = true;
-                        break;
-                    }
-                    if (infoRegDate.length() == 5) {
-                        infoRegDate = infoRegDate.replaceFirst("(\\d{4})(\\d{1})", "$10$2");
-                    }
-                    String infoMileageStr = infoElement.select(".list-infoBox .fc-gray").get(0).text();
-                    String infoMileage = infoMileageStr.substring(infoMileageStr.indexOf("行驶") + 2).replaceAll("万公里", "");
-                    String infoPrice = infoElement.select(".list-infoBox .priType-s .priType").get(0).text().replaceAll("万", "");
+                    String infoName = infoElement.select(".list-photo-info h3").get(0).text();
+                    String infoHref = infoElement.select("a").get(0).attr("href");
+                    String mileageTimeCityStr = infoElement.select(".list-photo-info .time").get(0).text();   // 2万公里／2015-12／北京
+                    String infoCity = mileageTimeCityStr.replaceFirst(mileageTimeCityRegex, "$3");
+                    String infoId = infoHref.replaceFirst(".*?/(\\d+).html.*", "$1");
+                    String infoRegDate = mileageTimeCityStr.replaceFirst(mileageTimeCityRegex, "$2").replaceAll("-", "");
+                    String infoMileage = mileageTimeCityStr.replaceFirst(mileageTimeCityRegex, "$1");
+                    String infoPrice = infoElement.select(".list-photo-info .price em b").get(0).text();
 
                     CarVo vo = new CarVo();
-                    vo.setSrc(SpiderEnum.guazi);
-                    vo.setCity(CityUtil.getName(SpiderEnum.guazi, infoCity));
+                    vo.setSrc(SpiderEnum.che168);
+                    vo.setCity(CityUtil.getName(SpiderEnum.che168, infoCity));
                     vo.setSrcId(infoId);
                     vo.setName(infoName);
                     vo.setRegDate(infoRegDate);
@@ -80,7 +69,7 @@ public class GuaziSpider extends SpiderBase implements Spider {
                     vo.setPrice(infoPrice);
                     vo.setAddress(infoHref);
                     infoList.add(vo);
-                    logToFile("guazi", vo.toString());
+                    logToFile("che168", vo.toString());
                 } catch (Exception e) {
                     e.printStackTrace();
                     logToFile("error", e.toString());
@@ -94,7 +83,7 @@ public class GuaziSpider extends SpiderBase implements Spider {
         url = url.replaceFirst("<page>", "1");
         int pageCount = 1;
         Document doc = getDoc(url);
-        Elements pageLinkElements = doc.select(".pageBox .pageLink a span");
+        Elements pageLinkElements = doc.select(".page a");
         if (null == pageLinkElements || pageLinkElements.size() < 1) {
             SenderUtil.sendMessage(SenderUtil.MessageLevel.ERROR, "getPageCount: " + url);
         }

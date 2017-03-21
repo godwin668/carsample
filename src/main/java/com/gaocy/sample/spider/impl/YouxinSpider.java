@@ -6,6 +6,7 @@ import com.gaocy.sample.spider.SpiderEnum;
 import com.gaocy.sample.util.CityUtil;
 import com.gaocy.sample.util.SenderUtil;
 import com.gaocy.sample.vo.CarVo;
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -33,7 +34,11 @@ public class YouxinSpider extends SpiderBase implements Spider {
     @Override
     public List<CarVo> listByCityName(String cityName) {
         List<CarVo> infoList = new ArrayList<CarVo>();
-        String url = baseUrl.replaceFirst("<city>", CityUtil.getEName(SpiderEnum.youxin, cityName));
+        String cityEName = CityUtil.getEName(SpiderEnum.youxin, cityName);
+        if (StringUtils.isBlank(cityEName)) {
+            return infoList;
+        }
+        String url = baseUrl.replaceFirst("<city>", cityEName);
         String[] mileageUriSubArr = {"sn_k0-1", "sn_k1-3", "sn_k3-6", "sn_k6-10", "sn_k10-20", "sn_k20-"};  // 里程
         String regDateAndMileageRegex = "上牌(.*?)｜里程(.*?)万公里";
         for (String mileageUriSub : mileageUriSubArr) {                     // 循环所有里程
