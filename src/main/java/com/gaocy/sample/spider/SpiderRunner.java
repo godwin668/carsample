@@ -21,6 +21,7 @@ public class SpiderRunner<T extends List<CarVo>> implements Callable {
 
     public static final ExecutorService es = Executors.newFixedThreadPool(ConfUtil.getString("init.src.list").split(",").length);
     private static DateFormat dfDate = new SimpleDateFormat("yyyyMMdd");
+    private static DateFormat dfDateTime = new SimpleDateFormat("yyyyMMddHHmmss");
     private Spider spider;
 
     public SpiderRunner(Spider spider) {
@@ -33,10 +34,15 @@ public class SpiderRunner<T extends List<CarVo>> implements Callable {
 
     @Override
     public T call() throws Exception {
+        String spiderName = spider.getClass().getSimpleName().toLowerCase().replaceAll("spider", "");
         String[] cityNameArr = spider.getCityNameArr();
         T infoAllList = (T) new ArrayList<CarVo>();
         for (String cityName : cityNameArr) {
+            long startTime = System.currentTimeMillis();
             List<CarVo> infoList = spider.listByCityName(cityName);
+            long endTime = System.currentTimeMillis();
+            String timeStr = dfDateTime.format(new Date(startTime)) + "_" + dfDateTime.format(new Date(endTime));
+            SpiderBase.logToFile("elapse", "[" + timeStr + "] [" + spiderName + "] [" + cityName + "] get " + infoList.size() + " cars, elapse: " + ((endTime - startTime) / 1000) + "s");
             infoAllList.addAll(infoList);
         }
         callback(infoAllList);
