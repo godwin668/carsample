@@ -61,7 +61,7 @@ public class Che168Spider extends SpiderBase implements Spider {
 
                     CarVo vo = new CarVo();
                     vo.setSrc(SpiderEnum.che168);
-                    vo.setCity(CityUtil.getName(SpiderEnum.che168, infoCity));
+                    vo.setCity(infoCity);
                     vo.setSrcId(infoId);
                     vo.setName(infoName);
                     vo.setRegDate(infoRegDate);
