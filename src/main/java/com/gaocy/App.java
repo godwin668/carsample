@@ -1,5 +1,6 @@
 package com.gaocy;
 
+import com.gaocy.sample.service.impl.SpiderServiceImpl;
 import com.gaocy.sample.spider.Spider;
 import com.gaocy.sample.spider.SpiderEnum;
 import com.gaocy.sample.spider.SpiderFactory;
@@ -15,13 +16,7 @@ import java.util.List;
 public class App {
 
     public static void main(String[] args) {
-        String[] srcArr = ConfUtil.getString("init.src.list").split(",");
-        String[] cityArr = ConfUtil.getString("init.city.list").split(",");
-        List<Spider> spiderList = new ArrayList<Spider>();
-        for (String src : srcArr) {
-            Spider spider = SpiderFactory.getSpider(SpiderEnum.valueOf(src), cityArr);
-            SpiderRunner runner = new SpiderRunner(spider);
-            runner.run();
-        }
+        SpiderServiceImpl service = new SpiderServiceImpl();
+        service.runSpider();
     }
 }

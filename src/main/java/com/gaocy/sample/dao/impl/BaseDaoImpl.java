@@ -11,6 +11,6 @@ public class BaseDaoImpl implements BaseDao {
 	protected static DB db;
 
 	static {
-		db = AppMongoConn.getDB();
+		// db = AppMongoConn.getDB();
 	}
 }
