@@ -172,7 +172,7 @@
             <contextPath>/</contextPath>
           </webApp>
           <httpConnector>
-            <port>8080</port>
+            <port>8088</port>
             <idleTimeout>60000</idleTimeout>
           </httpConnector>
           <stopKey>stopkey</stopKey>
