@@ -1,5 +1,6 @@
 package com.gaocy.sample.spider.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.gaocy.sample.spider.Spider;
 import com.gaocy.sample.spider.SpiderBase;
 import com.gaocy.sample.spider.SpiderEnum;
@@ -12,6 +13,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -80,7 +82,7 @@ public class GuaziSpider extends SpiderBase implements Spider {
                     vo.setPrice(infoPrice);
                     vo.setAddress(infoHref);
                     infoList.add(vo);
-                    logToFile("guazi", vo.toString());
+                    logToFile(dfDate.format(new Date()) + "/" + vo.getSrc().name().toLowerCase(), JSON.toJSONString(vo));
                 } catch (Exception e) {
                     e.printStackTrace();
                     logToFile("error", e.toString());

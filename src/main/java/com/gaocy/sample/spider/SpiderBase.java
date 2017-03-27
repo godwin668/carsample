@@ -26,7 +26,9 @@ public class SpiderBase {
 
     String[] cityNameArr;
 
-    private static DateFormat dfDateTime = new SimpleDateFormat("yyyyMMddHHmmss");
+    protected static DateFormat dfDateTime = new SimpleDateFormat("yyyyMMddHHmmss");
+    protected static DateFormat dfDate = new SimpleDateFormat("yyyyMMdd");
+    protected static DateFormat dfTime = new SimpleDateFormat("HHmmss");
 
     public SpiderBase(String[] cityNameArr) {
         this.cityNameArr = cityNameArr;
