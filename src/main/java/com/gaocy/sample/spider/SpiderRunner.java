@@ -42,7 +42,7 @@ public class SpiderRunner<T extends List<CarVo>> implements Callable {
             List<CarVo> infoList = spider.listByCityName(cityName);
             long endTime = System.currentTimeMillis();
             String timeStr = dfDate.format(new Date(startTime)) + " " + dfTime.format(new Date(startTime)) + "_" + dfTime.format(new Date(endTime));
-            SpiderBase.logToFile("elapse", "[" + timeStr + "] [" + spiderName + "] [" + cityName + "] get " + infoList.size() + " cars, elapse: " + ((endTime - startTime) / 1000) + "s");
+            SpiderBase.logToFile("elapse_" + dfDate.format(new Date()), "[" + timeStr + "] [" + spiderName + "] [" + cityName + "] get " + infoList.size() + " cars, elapse: " + ((endTime - startTime) / 1000) + "s");
             infoAllList.addAll(infoList);
         }
         callback(infoAllList);
