@@ -1,92 +1,89 @@
 package com.gaocy;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.gaocy.sample.spider.Spider;
-import com.gaocy.sample.spider.impl.GuaziSpider;
+import com.gaocy.sample.spider.SpiderBase;
+import com.gaocy.sample.spider.SpiderEnum;
+import com.gaocy.sample.util.ConfUtil;
+import com.gaocy.sample.vo.CarVo;
 import org.apache.commons.io.FileUtils;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Created by godwin on 2017/3/19.
  */
 public class Test {
 
-    private static Map<String, String> brandMap = new HashMap<String, String>();            // 品牌ID-品牌名称
-    private static Map<String, String> seriesMap = new HashMap<String, String>();           // 车系ID-车系名称
-    private static Map<String, String> seriesId2BrandIdMap = new HashMap<String, String>(); // 车系ID-品牌ID
+    protected static DateFormat dfDate = new SimpleDateFormat("yyyyMMdd");
+    protected static File baseDir = new File(ConfUtil.getString("init.log.base.url"));
 
     public static void main(String[] args) {
-        try {
-            File output = new File("/Users/Godwin/car/xinmodel/out_series.txt");
-
-            // 品牌
-            String brandRaw = FileUtils.readFileToString(new File("/Users/Godwin/car/xinmodel/raw_brand.txt"), "UTF-8");
-            Document brandDoc = Jsoup.parse(new File("/Users/Godwin/car/xinmodel/raw_brand.txt"), "UTF-8");
-            Elements brandElements = brandDoc.select("option");
-            for (Element brandElement : brandElements) {
-                String brandId = brandElement.attr("value");
-                String brandName = brandElement.text();
-                brandMap.put(brandId, brandName);
-                // System.out.println(brandElement.attr("value") + "\t" + brandElement.text());
+        Map<String, List<String>> priceDiff = getDiffPrice(SpiderEnum.guazi, 7);
+        for (Map.Entry<String, List<String>> entry : priceDiff.entrySet()) {
+            String srcId = entry.getKey();
+            List<String> priceList = entry.getValue();
+            if (null != priceList && priceList.size() > 1) {
+                SpiderBase.logToFile("diffprice", srcId + " - " + JSON.toJSONString(priceList));
+            } else {
+                SpiderBase.logToFile("uniqueprice", srcId + " - " + JSON.toJSONString(priceList));
             }
-
-            // 车系
-            String seriesRaw = FileUtils.readFileToString(new File("/Users/Godwin/car/xinmodel/raw_series.txt"), "UTF-8");
-            JSONObject seriesObj = JSON.parseObject(seriesRaw);
-            // System.out.println(seriesObj.toJSONString());
-            for (Map.Entry<String, Object> entry : seriesObj.entrySet()) {
-                String seriesId = entry.getKey();
-                JSONObject seriesValueJsonObj = JSON.parseObject(entry.getValue().toString()); // {"makeid":"28","seriesname":"起亚KX5","xin_enable":"1","brandid":"129","typeid":"6","seriesid":"3244","scid":"3285"}
-                String seriesName = seriesValueJsonObj.getString("seriesname");
-                String seriesBrandId = seriesValueJsonObj.getString("brandid");
-
-                seriesMap.put(seriesId, seriesName);
-                seriesId2BrandIdMap.put(seriesId, seriesBrandId);
-
-                String infoStr = seriesBrandId + "\t" + brandMap.get(seriesBrandId) + "\t" +
-                        seriesId + "\t" + seriesMap.get(seriesId);
-                System.out.println(infoStr);
-                FileUtils.writeStringToFile(output, infoStr + "\n", "UTF-8", true);
-            }
-
-            // 车型
-            String modelRaw = FileUtils.readFileToString(new File("/Users/Godwin/car/xinmodel/raw_model.txt"), "UTF-8");
-            JSONArray modelJsonArr = JSON.parseArray(modelRaw);
-            // {"xin_enable":"1","modeid":"90004864","modename":"2017款 1.6 手动 前行版","year":"2017",
-            //      "brandid":"92","displacement":"1.6","gearbox":"2","guideprice":"11.99","marketingprice":"10.07","seriesid":"156"}
-            for (Object modelJson : modelJsonArr) {
-                JSONObject modelJsonObj = JSON.parseObject(modelJson.toString());
-                String modelId = modelJsonObj.getString("modeid");
-                String modelName = modelJsonObj.getString("modename");
-                String year = modelJsonObj.getString("year");
-                String brandId = modelJsonObj.getString("brandid");
-                String displacement = modelJsonObj.getString("displacement");
-                String gearbox = modelJsonObj.getString("gearbox");
-                String guidePrice = modelJsonObj.getString("guideprice");
-                String marketingPrice = modelJsonObj.getString("marketingprice");
-                String seriesId = modelJsonObj.getString("seriesid");
-                String infoStr = brandId + "\t" + brandMap.get(brandId) + "\t" +
-                        seriesId + "\t" + seriesMap.get(seriesId) + "\t" +
-                        modelId + "\t" + modelName + "\t" +
-                        year + "\t" + displacement + "\t" + gearbox + "\t" + guidePrice + "\t" + marketingPrice;
-
-                System.out.println(infoStr);
-                FileUtils.writeStringToFile(output, infoStr + "\n", "UTF-8", true);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
+    }
+
+    /**
+     *
+     * 获取最近N天的样本价格
+     *
+     * @param spider
+     * @param days
+     * @return ID, List(yyyyMMdd price)
+     */
+    public static Map<String, List<String>> getDiffPrice(SpiderEnum spider, int days) {
+        String datePriceRegex = "(\\d{8}) (.*)";
+        Map<String, List<String>> priceListMap = new HashMap<String, List<String>>();
+        for (int i = (-days); i < 0; i++) {
+            File spiderSampleFile = getFile(spider, i);
+            if (!spiderSampleFile.isFile()) {
+                break;
+            }
+            SpiderBase.logToFile("process", spiderSampleFile.getAbsolutePath());
+            try {
+                List<String> sampleLines = FileUtils.readLines(spiderSampleFile, "UTF-8");
+                for (int lineIndex = sampleLines.size() - 1; lineIndex >= 0; lineIndex--) {
+                    String sampleLine = sampleLines.get(lineIndex);
+                    CarVo carVo = JSON.parseObject(sampleLine, CarVo.class);
+                    String srcId = carVo.getSrcId();
+                    String price = carVo.getPrice();
+                    List<String> priceList = priceListMap.get(srcId);
+                    String lastPrice = "";
+                    if (null == priceList) {
+                        priceList = new ArrayList<String>();
+                        priceListMap.put(srcId, priceList);
+                    } else {
+                        String lastDatePriceStr = priceList.get(priceList.size() - 1);
+                        if (StringUtils.isNotBlank(lastDatePriceStr) && lastDatePriceStr.matches(datePriceRegex)) {
+                            lastPrice = lastDatePriceStr.replaceFirst(datePriceRegex, "$2");
+                        }
+                    }
+                    if (null != price && !price.equals(lastPrice)) {
+                        String curDatePriceStr = dfDate.format(DateUtils.addDays(new Date(), i)) + " " + price;
+                        priceList.add(curDatePriceStr);
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return priceListMap;
+    }
+
+    public static File getFile(SpiderEnum spider, int addDay) {
+        Date dayBeforeDate = DateUtils.addDays(new Date(), addDay);
+        return new File(baseDir, dfDate.format(dayBeforeDate) + "/" + spider.name().toLowerCase() + ".txt");
     }
 }
