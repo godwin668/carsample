@@ -23,6 +23,9 @@ public class Test {
     protected static File baseDir = new File(ConfUtil.getString("init.log.base.url"));
 
     public static void main(String[] args) {
+        Set<String> idPriceKeySet = getIdPriceKeySet(SpiderEnum.guazi, 7);
+        System.out.println(JSON.toJSONString(idPriceKeySet));
+        /*
         Map<String, List<String>> priceDiff = getDiffPrice(SpiderEnum.guazi, 7);
         for (Map.Entry<String, List<String>> entry : priceDiff.entrySet()) {
             String srcId = entry.getKey();
@@ -33,6 +36,20 @@ public class Test {
                 SpiderBase.logToFile("uniqueprice", srcId + " - " + JSON.toJSONString(priceList));
             }
         }
+        */
+    }
+
+    public static Set<String> getIdPriceKeySet(SpiderEnum spider, int days) {
+        Set<String> idPriceKeySet = new HashSet<String>();
+        Map<String, List<String>> diffPriceMap = getDiffPrice(spider, days);
+        if (null != diffPriceMap) {
+            for (Map.Entry<String, List<String>> entry : diffPriceMap.entrySet()) {
+                String id = entry.getKey();
+                List<String> priceList = entry.getValue();
+                idPriceKeySet.add(id + "_" + priceList.get(priceList.size() - 1).substring(9));
+            }
+        }
+        return idPriceKeySet;
     }
 
     /**
