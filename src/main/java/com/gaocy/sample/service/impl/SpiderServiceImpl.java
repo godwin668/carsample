@@ -26,7 +26,7 @@ public class SpiderServiceImpl {
         for (String src : srcArr) {
             Spider spider = SpiderFactory.getSpider(SpiderEnum.valueOf(src), cityArr);
             SpiderRunner runner = new SpiderRunner(spider);
-            runner.run();
+            runner.submit();
         }
     }
 

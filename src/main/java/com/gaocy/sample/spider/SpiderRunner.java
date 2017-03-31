@@ -28,7 +28,7 @@ public class SpiderRunner<T extends List<CarVo>> implements Callable {
         this.spider = spider;
     }
 
-    public void run() {
+    public void submit() {
         es.submit(this);
     }
 
