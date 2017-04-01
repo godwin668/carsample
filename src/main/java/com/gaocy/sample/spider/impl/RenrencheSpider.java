@@ -56,6 +56,10 @@ public class RenrencheSpider extends SpiderBase implements Spider {
             }
             for (Element infoElement : infoElements) {
                 try {
+                    Elements infoNameElements = infoElement.select("a h3");
+                    if (null == infoNameElements || infoNameElements.size() < 1) {
+                        continue;
+                    }
                     String infoName = infoElement.select("a h3").get(0).text();
                     String infoHref = infoElement.select("a").get(0).attr("href");
                     String infoCity = infoHref.replaceFirst("/(\\w+)/.*", "$1");
