@@ -21,7 +21,8 @@ import java.util.List;
  */
 public class Che168Spider extends SpiderBase implements Spider {
 
-    private static String baseUrl = "http://www.che168.com/<city>/a0_0msdgscncgpi1ltocsp<page>exx0/";
+    // private static String baseUrl = "http://www.che168.com/<city>/a0_0msdgscncgpi1ltocsp<page>exx0/";
+    private static String baseUrl = "http://www.che168.com/<city>/a0_0msdgscncgpi1ltocsp<page>exb104y96x0/";   // 20170405
 
     public Che168Spider(String[] cityArr) {
         super(cityArr);

@@ -12,6 +12,7 @@ import org.apache.commons.lang3.time.DateUtils;
 
 import java.io.File;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -24,22 +25,29 @@ public class DayCountTool {
     protected static File baseDir = new File(ConfUtil.getString("init.log.base.url"));
 
     public static void main(String[] args) {
-        int startDate = 20170322;
-        int endDate = 20170329;
+        try {
+            Date startDate = dfDate.parse("20170322");
+            Date endDate = dfDate.parse("20170405");
 
-        String[] srcArr = ConfUtil.getString("init.src.list").split(",");
-        String[] cityArr = ConfUtil.getString("init.city.list").split(",");
-        List<Spider> spiderList = new ArrayList<Spider>();
-        for (String src : srcArr) { // 来源
-            SpiderEnum spider = SpiderEnum.valueOf(src);
-            SpiderBase.logToFile("diff", "-----------------------------");
-            SpiderBase.logToFile("diff", spider.name());
-            for (String city : cityArr) {
-                for (int dateInt = startDate; dateInt <= endDate; dateInt++) {  // 日期
-                    int[] oldCommonNewCount = getOldCommonNewCount(spider, city, "" + dateInt);
-                    System.out.println("" + dateInt + " " + spider.name() + " " + city + " " + JSON.toJSONString(oldCommonNewCount));
+            String[] srcArr = ConfUtil.getString("init.src.list").split(",");
+            String[] cityArr = ConfUtil.getString("init.city.list").split(",");
+            List<Spider> spiderList = new ArrayList<Spider>();
+            for (String src : srcArr) { // 来源
+                SpiderEnum spider = SpiderEnum.valueOf(src);
+                SpiderBase.logToFile("diff", "");
+                SpiderBase.logToFile("diff", "-----------------------------");
+                SpiderBase.logToFile("diff", "-- " + spider.name());
+                SpiderBase.logToFile("diff", "-----------------------------");
+                for (String city : cityArr) {
+                    for (Date curDate = startDate; curDate.before(endDate); curDate = DateUtils.addDays(curDate, 1)) {  // 日期
+                        int[] oldCommonNewCount = getOldCommonNewCount(spider, city, dfDate.format(curDate));
+                        String info = dfDate.format(curDate) + "\t" + spider.name() + "\t" + city + "\t" + oldCommonNewCount[0] + "\t" + oldCommonNewCount[1] + "\t" + oldCommonNewCount[2];
+                        SpiderBase.logToFile("diff", info);
+                    }
                 }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

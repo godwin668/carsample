@@ -85,6 +85,15 @@ public class CityUtil {
         return cityName2PinyinMap.get(name);
     }
 
+    public static Set<String> getAllCityName() {
+        return cityName2PinyinMap.keySet();
+    }
+
+    public static Set<String> getAllCityNameBySpider(SpiderEnum spider) {
+        return spiderCityZH2ENMap.get(spider).keySet();
+
+    }
+
     public static void main(String[] args) {
         System.out.println(SpiderEnum.guazi + ": " + getEName(SpiderEnum.guazi, "北京"));
         System.out.println(SpiderEnum.guazi + ": " + getName(SpiderEnum.guazi, "bj"));

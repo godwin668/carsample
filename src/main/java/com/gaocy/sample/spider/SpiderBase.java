@@ -1,9 +1,11 @@
 package com.gaocy.sample.spider;
 
 import com.alibaba.fastjson.JSON;
+import com.gaocy.sample.util.CityUtil;
 import com.gaocy.sample.util.ConfUtil;
 import com.gaocy.sample.util.UserAgentUtil;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -12,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
