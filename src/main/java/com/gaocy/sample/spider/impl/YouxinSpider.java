@@ -21,7 +21,7 @@ import java.util.List;
  */
 public class YouxinSpider extends SpiderBase implements Spider {
 
-    private static String baseUrl = "http://www.xin.com/<city>/s/i<page>/";
+    private static String URL_LIST_TEMPLATE = "http://www.xin.com/<city>/s/i<page>/";
 
     public YouxinSpider(String[] cityArr) {
         super(cityArr);
@@ -40,7 +40,7 @@ public class YouxinSpider extends SpiderBase implements Spider {
         if (StringUtils.isBlank(cityEName)) {
             return infoList;
         }
-        String url = baseUrl.replaceFirst("<city>", cityEName);
+        String url = URL_LIST_TEMPLATE.replaceFirst("<city>", cityEName);
         String[] mileageUriSubArr = {"sn_k0-1", "sn_k1-3", "sn_k3-6", "sn_k6-10", "sn_k10-20", "sn_k20-"};  // 里程
         String regDateAndMileageRegex = "上牌(.*?)｜里程(.*?)万公里";
         for (String mileageUriSub : mileageUriSubArr) {                     // 循环所有里程

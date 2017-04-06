@@ -21,7 +21,7 @@ import java.util.List;
  */
 public class RenrencheSpider extends SpiderBase implements Spider {
 
-    private static String baseUrl = "https://www.renrenche.com/<city>/ershouche/p<page>";
+    private static String URL_LIST_TEMPLATE = "https://www.renrenche.com/<city>/ershouche/p<page>";
 
     public RenrencheSpider(String[] cityArr) {
         super(cityArr);
@@ -40,7 +40,7 @@ public class RenrencheSpider extends SpiderBase implements Spider {
         if (StringUtils.isBlank(cityEName)) {
             return infoList;
         }
-        String url = baseUrl.replaceFirst("<city>", cityEName);
+        String url = URL_LIST_TEMPLATE.replaceFirst("<city>", cityEName);
         int pageCount = getPageCount(url);
         boolean isOtherCity = false;
         String mileageTimeCityRegex = "(\\d+)年(\\d+)月/(.*?)万公里";    // 2010年03月/3.75万公里

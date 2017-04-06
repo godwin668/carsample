@@ -21,7 +21,7 @@ import java.util.List;
  */
 public class GuaziSpider extends SpiderBase implements Spider {
 
-    private static String baseUrl = "https://www.guazi.com/<city>/buy/o<page>/";
+    private static String URL_LIST_TEMPLATE = "https://www.guazi.com/<city>/buy/o<page>/";
 
     public GuaziSpider(String[] cityArr) {
         super(cityArr);
@@ -40,7 +40,7 @@ public class GuaziSpider extends SpiderBase implements Spider {
         if (StringUtils.isBlank(cityEName)) {
             return infoList;
         }
-        String url = baseUrl.replaceFirst("<city>", cityEName);
+        String url = URL_LIST_TEMPLATE.replaceFirst("<city>", cityEName);
         int pageCount = getPageCount(url);
         boolean isOtherCity = false;
         for (int i = 1; i <= pageCount; i++) {

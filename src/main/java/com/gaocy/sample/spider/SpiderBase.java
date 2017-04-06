@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.gaocy.sample.util.CityUtil;
 import com.gaocy.sample.util.ConfUtil;
 import com.gaocy.sample.util.UserAgentUtil;
+import com.gaocy.sample.vo.CarDetailVo;
+import com.gaocy.sample.vo.CarVo;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -43,6 +45,10 @@ public class SpiderBase {
 
     public void setCityArr(String[] cityNameArr) {
         this.cityNameArr = cityNameArr;
+    }
+
+    public CarDetailVo getByUrl(CarVo carVo) {
+        return null;
     }
 
     public static Document getDoc(String url) {
@@ -112,6 +118,13 @@ public class SpiderBase {
         } catch (IOException e) {
             System.err.println("[LOG TO FILE ERROR] " + msg);
         }
+    }
+
+    public static String removeWhiteSpace(String str) {
+        if (null == str) {
+            return null;
+        }
+        return str.replace(String.valueOf((char) 160), "").replaceAll("\\s", "");
     }
 
     @Override
