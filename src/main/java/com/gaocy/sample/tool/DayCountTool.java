@@ -40,15 +40,45 @@ public class DayCountTool {
                 SpiderBase.logToFile("diff", "-----------------------------");
                 for (String city : cityArr) {
                     for (Date curDate = startDate; curDate.before(endDate); curDate = DateUtils.addDays(curDate, 1)) {  // 日期
-                        int[] oldCommonNewCount = getOldCommonNewCount(spider, city, dfDate.format(curDate));
-                        String info = dfDate.format(curDate) + "\t" + spider.name() + "\t" + city + "\t" + oldCommonNewCount[0] + "\t" + oldCommonNewCount[1] + "\t" + oldCommonNewCount[2];
+                        Collection[] oldCommonNewColl = getOldCommonNewColl(spider, city, dfDate.format(curDate));
+                        String info = dfDate.format(curDate) + "\t" + spider.name() + "\t" + city + "\t" + oldCommonNewColl[0].size() + "\t" + oldCommonNewColl[1].size() + "\t" + oldCommonNewColl[2].size();
+                        String infoIds = "\n\n------------------------------------------------\n" +
+                                dfDate.format(curDate) + "\t" + spider.name() + "\t" + city + "\n" +
+                                "--> 下架共" + oldCommonNewColl[0].size() + "条：\n" + JSON.toJSONString(oldCommonNewColl[0]) + "\n" +
+                                "--> 不变共" + oldCommonNewColl[1].size() + "条：\n" + JSON.toJSONString(oldCommonNewColl[1]) + "\n" +
+                                "--> 新增共" + oldCommonNewColl[2].size() + "条：\n" + JSON.toJSONString(oldCommonNewColl[2]);
                         SpiderBase.logToFile("diff", info);
+                        SpiderBase.logToFile("diffids", infoIds);
                     }
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static Collection[] getOldCommonNewColl(SpiderEnum spider, String city, String dateStr) {
+        Collection[] diffColl = new Collection[3];
+        try {
+            Date yestoday = DateUtils.addDays(dfDate.parse(dateStr), -1);
+            String dateYestodayStr = dfDate.format(yestoday);
+            File todayFile = new File(baseDir, dateStr + "/" + spider.name().toLowerCase() + ".txt");
+            File yestoodayFile = new File(baseDir, dateYestodayStr + "/" + spider.name().toLowerCase() + ".txt");
+            if (todayFile.isFile() && yestoodayFile.isFile()) {
+                Set<String> yestodayIdSet = getIdSet(spider, city, dateYestodayStr);
+                Set<String> todayIdSet = getIdSet(spider, city, dateStr);
+                Collection commonIdSet = CollectionUtils.intersection(todayIdSet, yestodayIdSet);
+                Collection oldColl = CollectionUtils.subtract(yestodayIdSet, todayIdSet);
+                Collection newColl = CollectionUtils.subtract(todayIdSet, yestodayIdSet);
+                diffColl[0] = oldColl;
+                diffColl[1] = commonIdSet;
+                diffColl[2] = newColl;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return diffColl;
     }
 
     public static int[] getOldCommonNewCount(SpiderEnum spider, String city, String dateStr) {

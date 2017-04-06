@@ -24,14 +24,23 @@ public class CarDetailVo {
     // 名称
     private String name;
 
-    // 品牌
-    private String brand;
+    // 品牌ID
+    private String brandId;
 
-    // 车系
-    private String series;
+    // 品牌名称
+    private String brandName;
+
+    // 车系ID
+    private String seriesId;
+
+    // 车系名称
+    private String seriesName;
 
     // 车型（名称和ID）
-    private String model;
+    private String modelId;
+
+    // 车型名称（名称和ID）
+    private String modelName;
 
     // 车辆颜色
     private String color;
