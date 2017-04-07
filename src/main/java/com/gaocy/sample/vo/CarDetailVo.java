@@ -23,6 +23,8 @@ public class CarDetailVo {
     // 车型名称 modelName
     // 车辆颜色 color
     // 行驶里程 mileage
+    // 排量 displacement
+    // 变速箱 gearBox
     // 价格 price
     // 发布时间 postDate
     // 上牌时间 regDate
@@ -74,6 +76,12 @@ public class CarDetailVo {
 
     // 行驶里程
     private String mileage;
+
+    // 排量
+    private String displacement;
+
+    // 变速箱
+    private String gearBox;
 
     // 价格
     private String price;
@@ -217,6 +225,22 @@ public class CarDetailVo {
 
     public void setMileage(String mileage) {
         this.mileage = mileage;
+    }
+
+    public String getDisplacement() {
+        return displacement;
+    }
+
+    public void setDisplacement(String displacement) {
+        this.displacement = displacement;
+    }
+
+    public String getGearBox() {
+        return gearBox;
+    }
+
+    public void setGearBox(String gearBox) {
+        this.gearBox = gearBox;
     }
 
     public String getPrice() {

@@ -34,7 +34,7 @@ public class DetailApp {
         Spider spider = SpiderFactory.getSpider(SpiderEnum.che168, new String[] {"北京"});
         for (CarVo carVo : carVoList) {
             CarDetailVo carDetailVo = spider.getByUrl(carVo);
-            System.out.println(JSON.toJSONString(carDetailVo));
+            SpiderBase.logToFile("infodetail", JSON.toJSONString(carDetailVo));
         }
     }
 
