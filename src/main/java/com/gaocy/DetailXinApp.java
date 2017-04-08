@@ -1,8 +1,10 @@
 package com.gaocy;
 
 import com.alibaba.fastjson.JSON;
+import com.gaocy.sample.spider.Spider;
 import com.gaocy.sample.spider.SpiderBase;
 import com.gaocy.sample.spider.SpiderEnum;
+import com.gaocy.sample.spider.SpiderFactory;
 import com.gaocy.sample.vo.BizVo;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -16,8 +18,11 @@ public class DetailXinApp extends DetailBaseApp {
 
     public static void main(String[] args) {
         // genAllShop();
+        String[] cityArr = new String[] { "北京", "长沙", "重庆", "石家庄", "天津" };
         String shopUrl = "http://www.xin.com/d/500.html";
-
+        Spider spider = SpiderFactory.getSpider(SpiderEnum.youxin, cityArr);
+        int pageCount = spider.getPageCount(shopUrl);
+        System.out.println("page: " + pageCount);
     }
 
     public static void genAllShop() {

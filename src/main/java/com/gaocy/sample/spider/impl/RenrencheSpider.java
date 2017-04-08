@@ -96,7 +96,7 @@ public class RenrencheSpider extends SpiderBase implements Spider {
         return infoList;
     }
 
-    public static int getPageCount(String url) {
+    public int getPageCount(String url) {
         url = url.replaceFirst("<page>", "1");
         int pageCount = 1;
         Document doc = getDoc(url);

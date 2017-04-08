@@ -16,4 +16,6 @@ public interface Spider {
 
     CarDetailVo getByUrl(CarVo carVo);
 
+    int getPageCount(String url);
+
 }
