@@ -15,7 +15,9 @@ import java.util.Date;
 public class DetailXinApp extends DetailBaseApp {
 
     public static void main(String[] args) {
-        genAllShop();
+        // genAllShop();
+        String shopUrl = "http://www.xin.com/d/500.html";
+
     }
 
     public static void genAllShop() {
@@ -34,6 +36,7 @@ public class DetailXinApp extends DetailBaseApp {
                     String address = shopTitleElements.select(".ads").get(0).text();
                     String city = shopTabElements.get(0).text();
                     String phone = shopTabElements.get(1).attr("data-mobile");
+
                     BizVo bizVo = new BizVo();
                     bizVo.setId("" + i);
                     bizVo.setCity(city);
@@ -41,6 +44,13 @@ public class DetailXinApp extends DetailBaseApp {
                     bizVo.setName(address);
                     bizVo.setPhone(phone);
                     bizVo.setUrl(url);
+                    try {
+                        String carSum = doc.select(".shop-con .car-upper span em").text();
+                        bizVo.setCarSum(Integer.valueOf(carSum));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
                     System.out.println("info: " + name + ", " + address + ", " + city + ", " + phone);
                     SpiderBase.logToFile("summary/" + SpiderEnum.youxin.name() + "_shop", dfDateTime.format(new Date()) + "\t" + city + "\t" + url + "\t" + name + "\t" + address + "\t" + phone);
                     SpiderBase.logToFile("summary/" + SpiderEnum.youxin.name() + "_shop_json", JSON.toJSONString(bizVo));

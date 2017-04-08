@@ -25,6 +25,9 @@ public class BizVo {
     // 商家URL
     private String url;
 
+    // 车辆数
+    private int carSum;
+
     public String getId() {
         return id;
     }
@@ -71,6 +74,14 @@ public class BizVo {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public int getCarSum() {
+        return carSum;
+    }
+
+    public void setCarSum(int carSum) {
+        this.carSum = carSum;
     }
 
     @Override
