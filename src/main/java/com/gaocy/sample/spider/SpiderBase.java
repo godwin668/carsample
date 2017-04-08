@@ -47,6 +47,10 @@ public class SpiderBase {
         this.cityNameArr = cityNameArr;
     }
 
+    public List<CarVo> listByShopId(String shopId) {
+        return null;
+    }
+
     public CarDetailVo getByUrl(CarVo carVo) {
         return null;
     }

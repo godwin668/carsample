@@ -90,6 +90,11 @@ public class YouxinSpider extends SpiderBase implements Spider {
         return infoList;
     }
 
+    @Override
+    public List<CarVo> listByShopId(String shopId) {
+        return super.listByShopId(shopId);
+    }
+
     public CarDetailVo getByUrl(CarVo carVo) {
         CarDetailVo carDetailVo = new CarDetailVo();
         if (null == carVo) {

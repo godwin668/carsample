@@ -14,6 +14,8 @@ public interface Spider {
 
     List<CarVo> listByCityName(String cityName);
 
+    List<CarVo> listByShopId(String shopId);
+
     CarDetailVo getByUrl(CarVo carVo);
 
     int getPageCount(String url);
