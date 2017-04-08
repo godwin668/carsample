@@ -1,66 +1,139 @@
 package com.gaocy.sample.util;
 
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
-import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.HttpClient;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.conn.params.ConnRouteParams;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by godwin on 2017-03-24.
  */
 public class HttpClientUtil {
 
-    public static void main(String args[])
-    {
-        StringBuffer sb = new StringBuffer();
-        //创建HttpClient实例
-        HttpClient client = getHttpClient();
-        //创建httpGet
-        HttpGet httpGet = new HttpGet("");
-        //执行
+    private static List<CloseableHttpClient> httpClientPool = new ArrayList<CloseableHttpClient>();
+    private static Map<String, Integer> hostLastIndexMap = new HashMap<String, Integer>();
+    private static Map<String, Map<Integer, Long>> hostIndexTimeMap = new HashMap<String, Map<Integer, Long>>();
+    private static int sleepInterval = ConfUtil.getInt("spider.sleep.time");
+
+    static {
+        // grabzz:pVyAerxF@61.155.147.76:10001
+        // grabzz:YoZcisu8@61.155.147.76:10002
+        // grabzz:ZYYBPb6B@61.155.147.76:10003
+        // grabzz:KI8ZPFZT@61.155.147.76:10004
+        // grabzz:Xx2Ls3qK@61.155.147.76:10005
+        // grabzz:WdNl2JXe@61.155.147.76:10006
+        // grabzz:FE1k7mXS@61.155.147.76:10007
+        // grabzz:Cm1bmEjf@61.155.147.76:10008
+        httpClientPool.add(getClient("61.155.147.76", 10001, "grabzz", "pVyAerxF"));
+        httpClientPool.add(getClient("61.155.147.76", 10002, "grabzz", "YoZcisu8"));
+        httpClientPool.add(getClient("61.155.147.76", 10003, "grabzz", "ZYYBPb6B"));
+        httpClientPool.add(getClient("61.155.147.76", 10004, "grabzz", "KI8ZPFZT"));
+        httpClientPool.add(getClient("61.155.147.76", 10005, "grabzz", "Xx2Ls3qK"));
+        httpClientPool.add(getClient("61.155.147.76", 10006, "grabzz", "WdNl2JXe"));
+        httpClientPool.add(getClient("61.155.147.76", 10007, "grabzz", "FE1k7mXS"));
+        httpClientPool.add(getClient("61.155.147.76", 10008, "grabzz", "Cm1bmEjf"));
+    }
+
+    public static void main(String args[]) {
+        String url = "http://hk.iuvpn.com:8088/";
+        System.out.println(get(url));
+        System.out.println(get(url));
+        System.out.println(get(url));
+        System.out.println(get(url));
+    }
+
+    public static List<CloseableHttpClient> getHttpClientPool() {
+        return httpClientPool;
+    }
+
+    private static int getHttpClientIndex(String url) {
         try {
-            HttpResponse response = client.execute(httpGet);
-
-            HttpEntity entry = response.getEntity();
-
-            if(entry != null)
-            {
-                InputStreamReader is = new InputStreamReader(entry.getContent());
-                BufferedReader br = new BufferedReader(is);
-                String str = null;
-                while((str = br.readLine()) != null)
-                {
-                    sb.append(str.trim());
-                }
-                br.close();
+            String host = new URL(url).getHost();
+            Integer lastIndex = hostLastIndexMap.get(host);
+            if (null == lastIndex) {
+                lastIndex = httpClientPool.size() - 1;
             }
-
+            Integer curIndex = (1 + lastIndex) % httpClientPool.size();
+            hostLastIndexMap.put(host, curIndex);
+            Map<Integer, Long> indexTimeMap = hostIndexTimeMap.get(host);
+            if (null == indexTimeMap) {
+                indexTimeMap = new HashMap<Integer, Long>();
+                hostIndexTimeMap.put(host, indexTimeMap);
+            }
+            Long curIndexPreTime = indexTimeMap.get(curIndex);
+            Long currentTimeLong = System.currentTimeMillis();
+            if (null != curIndexPreTime && (curIndexPreTime > (currentTimeLong - sleepInterval))) {
+                Thread.sleep(curIndexPreTime - (currentTimeLong - sleepInterval));
+            }
+            indexTimeMap.put(curIndex, System.currentTimeMillis());
+            return curIndex;
         } catch (Exception e) {
             e.printStackTrace();
         }
-        System.out.println(sb.toString());
+        return 0;
     }
 
-    //设置代理
-    public static HttpClient getHttpClient() {
-        DefaultHttpClient httpClient = new DefaultHttpClient();
-        String proxyHost = "";
-        int proxyPort = 0;
-        String userName = "";
-        String password = "";
-        httpClient.getCredentialsProvider().setCredentials(
+    public static String get(String url) {
+        CloseableHttpClient httpClient = httpClientPool.get(getHttpClientIndex(url));
+        try {
+            HttpGet httpGet = new HttpGet(url);
+            httpGet.addHeader("Accept", "text/html");
+            httpGet.addHeader("Accept-Charset", "utf-8");
+            httpGet.addHeader("Accept-Encoding", "gzip");
+            httpGet.addHeader("Accept-Language", "en-US,en");
+            httpGet.addHeader("User-Agent", UserAgentUtil.get());
+            CloseableHttpResponse response = httpClient.execute(httpGet);
+            try {
+                int statusCode = response.getStatusLine().getStatusCode();
+                if (statusCode >= 200 && statusCode < 300) {
+                    String result = EntityUtils.toString(response.getEntity());
+                    return result;
+                } else {
+                    System.exit(0);
+                    throw new ClientProtocolException("Unexpected response status: " + statusCode);
+                }
+            } finally {
+                response.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            // httpclient.close();  HttpClient池中的客户端需要复用，请勿关闭
+        }
+        return "";
+    }
+
+    /**
+     * 获取HttpClient
+     *
+     * @param proxyHost
+     * @param proxyPort
+     * @param userName
+     * @param passwd
+     * @return
+     */
+    public static CloseableHttpClient getClient(String proxyHost, int proxyPort, String userName, String passwd) {
+        CredentialsProvider credsProvider = new BasicCredentialsProvider();
+        credsProvider.setCredentials(
                 new AuthScope(proxyHost, proxyPort),
-                new UsernamePasswordCredentials(userName, password));
-        HttpHost proxy = new HttpHost(proxyHost,proxyPort);
-        httpClient.getParams().setParameter(ConnRouteParams.DEFAULT_PROXY, proxy);
-        return httpClient;
+                new UsernamePasswordCredentials(userName, passwd));
+        CloseableHttpClient httpclient = HttpClients.custom()
+                .setDefaultCredentialsProvider(credsProvider)
+                .setProxy(new HttpHost(proxyHost, proxyPort))
+                .build();
+        return httpclient;
     }
 }

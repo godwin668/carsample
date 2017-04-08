@@ -1,13 +1,12 @@
 package com.gaocy.sample.spider;
 
 import com.alibaba.fastjson.JSON;
-import com.gaocy.sample.util.CityUtil;
 import com.gaocy.sample.util.ConfUtil;
+import com.gaocy.sample.util.HttpClientUtil;
 import com.gaocy.sample.util.UserAgentUtil;
 import com.gaocy.sample.vo.CarDetailVo;
 import com.gaocy.sample.vo.CarVo;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -16,7 +15,6 @@ import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -28,6 +26,8 @@ public class SpiderBase {
     static File logFile = new File(ConfUtil.getString("init.log.base.url"));
 
     private static int sleepInterval = ConfUtil.getInt("spider.sleep.time");
+
+    private static String spiderConnector = ConfUtil.getString("init.spider.connector");
 
     String[] cityNameArr;
 
@@ -55,7 +55,11 @@ public class SpiderBase {
         Document doc = null;
         for (int i = 0; i < 5; i++) {
             try {
-                doc = getDocException(url);
+                if ("jsoup".equalsIgnoreCase(spiderConnector)) {
+                    doc = getDocByJsoup(url);
+                } else if ("httpclient".equalsIgnoreCase(spiderConnector)) {
+                    doc = getDocByHttpClient(url);
+                }
                 break;
             } catch (Exception e) {
                 try {
@@ -74,7 +78,13 @@ public class SpiderBase {
         }
     }
 
-    static Document getDocException(String url) throws Exception {
+    public static Document getDocByHttpClient(String url) throws Exception {
+        String content = HttpClientUtil.get(url);
+        Document doc = Jsoup.parse(content);
+        return doc;
+    }
+
+    public static Document getDocByJsoup(String url) throws Exception {
         Thread.sleep(sleepInterval);
         logToFile("getdocurl", dfDateTime.format(new Date()) + " " + url);
         Document doc = Jsoup.connect(url)

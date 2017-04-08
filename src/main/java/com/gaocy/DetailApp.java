@@ -1,7 +1,6 @@
 package com.gaocy;
 
 import com.alibaba.fastjson.JSON;
-import com.gaocy.sample.service.impl.SpiderServiceImpl;
 import com.gaocy.sample.spider.Spider;
 import com.gaocy.sample.spider.SpiderBase;
 import com.gaocy.sample.spider.SpiderEnum;
@@ -9,9 +8,7 @@ import com.gaocy.sample.spider.SpiderFactory;
 import com.gaocy.sample.util.ConfUtil;
 import com.gaocy.sample.vo.CarDetailVo;
 import com.gaocy.sample.vo.CarVo;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.time.DateUtils;
 
 import java.io.File;
 import java.text.DateFormat;
@@ -24,20 +21,38 @@ import java.util.*;
 public class DetailApp {
 
     protected static DateFormat dfDate = new SimpleDateFormat("yyyyMMdd");
+    protected static DateFormat dfDateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     protected static File baseDir = new File(ConfUtil.getString("init.log.base.url"));
 
     // http://www.che168.com/dealer/125701/20443429.html?pvareaid=100519#pos=6#page=1#rtype=1
     protected static String BASE_URL_CHE168 = "http://www.che168.com";
 
     public static void main(String[] args) {
-        List<CarVo> carVoList = listCarVo(SpiderEnum.che168, "北京", "20170403");
-        Spider spider = SpiderFactory.getSpider(SpiderEnum.che168, new String[] {"北京"});
-        for (CarVo carVo : carVoList) {
-            CarDetailVo carDetailVo = spider.getByUrl(carVo);
-            SpiderBase.logToFile("infodetail", JSON.toJSONString(carDetailVo));
+        String dateStr = "20170407";
+        SpiderEnum spiderEnum = SpiderEnum.che168;
+        String[] cityArr = new String[] { "北京", "长沙", "重庆", "石家庄", "天津" };
+        for (String city : cityArr) {
+            Spider spider = SpiderFactory.getSpider(spiderEnum, new String[] { city });
+            String spiderName = spider.getClass().getSimpleName().toLowerCase().replaceAll("spider", "");
+            List<CarVo> carVoList = listCarVo(spiderEnum, city, dateStr);
+            System.out.println(city + "_" + carVoList.size());
+            SpiderBase.logToFile("infodetail/summary", "[" + dfDateTime.format(new Date()) + "] Start processing " + spiderName + " " + city + ", info size: " + carVoList.size());
+            for (CarVo carVo : carVoList) {
+                CarDetailVo carDetailVo = spider.getByUrl(carVo);
+                SpiderBase.logToFile("infodetail/" + spiderName + "/" + city, JSON.toJSONString(carDetailVo));
+            }
+            SpiderBase.logToFile("infodetail/summary", "[" + dfDateTime.format(new Date()) + "] END processing " + spiderName + " " + city + ", info size: " + carVoList.size());
         }
     }
 
+    /**
+     * 获取列表页车源信息
+     *
+     * @param spider 抓取源
+     * @param city 城市
+     * @param dateStr 日期
+     * @return
+     */
     public static List<CarVo> listCarVo(SpiderEnum spider, String city, String dateStr) {
         List<CarVo> carVoList = new ArrayList<CarVo>();
         File todayFile = new File(baseDir, dateStr + "/" + spider.name().toLowerCase() + ".txt");

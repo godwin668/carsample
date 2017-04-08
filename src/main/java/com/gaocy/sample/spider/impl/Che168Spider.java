@@ -91,7 +91,6 @@ public class Che168Spider extends SpiderBase implements Spider {
             return carDetailVo;
         }
 
-
         try {
             String detailUrl = URL_BASE + carVo.getAddress();
             Document detailDoc = getDoc(detailUrl);
@@ -219,11 +218,10 @@ public class Che168Spider extends SpiderBase implements Spider {
         } catch (Exception e) {
             logToFile("error", "[CAR VO] " + JSON.toJSONString(carVo));
         }
-
         return carDetailVo;
     }
 
-    public static int getPageCount(String url) {
+    public int getPageCount(String url) {
         url = url.replaceFirst("<page>", "1");
         int pageCount = 1;
         Document doc = getDoc(url);
