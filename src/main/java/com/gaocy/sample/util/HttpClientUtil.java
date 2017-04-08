@@ -1,9 +1,9 @@
 package com.gaocy.sample.util;
 
+import com.gaocy.sample.spider.SpiderBase;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -102,8 +102,7 @@ public class HttpClientUtil {
                     String result = EntityUtils.toString(response.getEntity());
                     return result;
                 } else {
-                    System.exit(0);
-                    throw new ClientProtocolException("Unexpected response status: " + statusCode);
+                    SpiderBase.logToFile("error", url + ", code: " + statusCode);
                 }
             } finally {
                 response.close();
