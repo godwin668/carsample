@@ -16,6 +16,7 @@ public class CarVo {
     private String mileage;
     private String price;
     private String address;
+    private String shopId;
 
     public SpiderEnum getSrc() {
         return src;
@@ -87,6 +88,14 @@ public class CarVo {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public String getShopId() {
+        return shopId;
+    }
+
+    public void setShopId(String shopId) {
+        this.shopId = shopId;
     }
 
     @Override

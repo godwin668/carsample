@@ -1,13 +1,21 @@
 package com.gaocy;
 
 import com.alibaba.fastjson.JSON;
+import com.gaocy.sample.spider.Spider;
 import com.gaocy.sample.spider.SpiderBase;
 import com.gaocy.sample.spider.SpiderEnum;
-import com.gaocy.sample.vo.BizVo;
+import com.gaocy.sample.spider.SpiderFactory;
+import com.gaocy.sample.util.CityUtil;
+import com.gaocy.sample.vo.CarDetailVo;
+import com.gaocy.sample.vo.ShopVo;
+import com.gaocy.sample.vo.CarVo;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
-import java.util.Date;
+import java.io.File;
+import java.util.*;
 
 /**
  * Created by godwin on 2017-03-16.
@@ -15,18 +23,129 @@ import java.util.Date;
 public class DetailXinApp extends DetailBaseApp {
 
     public static void main(String[] args) {
-        genAllShop();
-        /*
+        // 抓取所有店铺信息
+        List<String> shopIdList = new ArrayList<String>();
+        List<ShopVo> shopVoList = listShop(null);
+        for (ShopVo shopVo : shopVoList) {
+            String shopId = shopVo.getId();
+            shopIdList.add(shopId);
+        }
+        grabAllShop(shopIdList);
+
+        // 读取指定城市店铺信息
         String[] cityArr = new String[] { "北京", "长沙", "重庆", "石家庄", "天津" };
-        String shopUrl = "http://www.xin.com/d/500.html";
+        if (null == cityArr) {
+            cityArr = CityUtil.getAllCityNameBySpider(SpiderEnum.youxin).toArray(new String[] {});
+        }
+        List<ShopVo> shopList = listShop(cityArr);
+        SpiderBase.logToFile("logs/" + dfDate.format(new Date()) + "_" + SpiderEnum.youxin.name(), "[SHOP CARLIST] Grabing " + shopList.size() + " shops' car list...");
+
+        // 获取指定店铺车源列表
         Spider spider = SpiderFactory.getSpider(SpiderEnum.youxin, cityArr);
-        int pageCount = spider.getPageCount(shopUrl);
-        System.out.println("page: " + pageCount);
-        */
+        String spiderName = spider.getClass().getSimpleName().toLowerCase().replaceAll("spider", "");
+        for (ShopVo shopVo : shopList) {
+            String shopId = shopVo.getId();
+            List<CarVo> shopCarList = spider.listByShopId(shopId);
+            SpiderBase.logToFile("logs/" + dfDate.format(new Date()) + "_" + SpiderEnum.youxin.name(), "[SHOP CARLIST] [" + dfDateTime.format(new Date()) + "] [" + shopVo.getCity() + "] " + shopVo.getName() + "(" + shopId + ") has " + shopCarList.size() + "(" + shopVo.getCarSum() + ") cars.");
+        }
+
+        // 根据车源列表信息获取车源详情
+        String dateStr = dfDate.format(new Date());
+        for (String city : cityArr) {
+            List<CarVo> carVoList = listCarVo(SpiderEnum.youxin, city, dateStr);
+            SpiderBase.logToFile("logs/" + dfDate.format(new Date()) + "_" + spiderName, "[SHOP CARDETAIL] [" + dfDateTime.format(new Date()) + "] Start processing " + spiderName + " " + city + ", info size: " + carVoList.size());
+            for (CarVo carVo : carVoList) {
+                CarDetailVo carDetailVo = spider.getByUrl(carVo);
+                SpiderBase.logToFile("cardetail/" + spiderName + "/" + city, JSON.toJSONString(carDetailVo));
+            }
+            SpiderBase.logToFile("logs/" + dfDate.format(new Date()) + "_" + spiderName, "[SHOP CARDETAIL] [" + dfDateTime.format(new Date()) + "] END processing " + spiderName + " " + city + ", info size: " + carVoList.size());
+        }
     }
 
-    public static void genAllShop() {
-        for (int i = 1; i < 65000; i++) {
+    /**
+     * 读取店铺信息
+     *
+     * @param cityArr
+     * @return
+     */
+    public static List<ShopVo> listShop(String[] cityArr) {
+        List<ShopVo> shopVoList = new ArrayList<ShopVo>();
+        List<String> cityList = new ArrayList<String>();
+        if (null != cityArr && cityArr.length > 0) {
+            for (String city : cityArr) {
+                if (StringUtils.isNotBlank(city)) {
+                    cityList.add(city);
+                }
+            }
+        }
+        File shopFile = new File(baseDir, SpiderEnum.youxin.name() + "_shop.txt");
+        if (!shopFile.isFile()) {
+            return shopVoList;
+        }
+        try {
+            List<String> shopStrList = FileUtils.readLines(shopFile, "UTF-8");
+            for (String shopStr : shopStrList) {
+                ShopVo shopVo = JSON.parseObject(shopStr, ShopVo.class);
+                String shopCity =  shopVo.getCity();
+                if (cityList.size() < 1 || cityList.contains(shopCity)) {
+                    shopVoList.add(shopVo);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return shopVoList;
+    }
+
+    /**
+     * 读取车源列表
+     *
+     * @param spider
+     * @param city
+     * @param dateStr
+     * @return
+     */
+    public static List<CarVo> listCarVo(SpiderEnum spider, String city, String dateStr) {
+        List<CarVo> carVoList = new ArrayList<CarVo>();
+        File todayFile = new File(baseDir, dateStr + "/" + spider.name().toLowerCase() + "_shop.txt");
+        if (todayFile.isFile()) {
+            try {
+                List<String> sampleLines = FileUtils.readLines(todayFile, "UTF-8");
+                for (int lineIndex = sampleLines.size() - 1; lineIndex >= 0; lineIndex--) {
+                    String sampleLine = sampleLines.get(lineIndex);
+                    CarVo carVo = JSON.parseObject(sampleLine, CarVo.class);
+                    String srcId = carVo.getSrcId();
+                    String carCity = carVo.getCity();
+                    if (null != city && city.equals(carCity)) {
+                        carVoList.add(carVo);
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        Collections.sort(carVoList, new Comparator<CarVo>() {
+            @Override
+            public int compare(CarVo o1, CarVo o2) {
+                String id1 = o1.getSrcId();
+                String id2 = o2.getSrcId();
+                return id1.compareTo(id2);  // 递增
+            }
+        });
+        return carVoList;
+    }
+
+    /**
+     * 抓取所有店铺
+     */
+    public static void grabAllShop(List<String> shopIdList) {
+        if (null == shopIdList || shopIdList.size() < 1) {
+            shopIdList = new ArrayList<String>();
+            for (int i = 1; i < 65000; i++) {
+                shopIdList.add("" + i);
+            }
+        }
+        for (String i : shopIdList) {
             try {
                 String url = "http://www.xin.com/d/" + i + ".html";
                 Document doc = SpiderBase.getDoc(url);
@@ -42,23 +161,20 @@ public class DetailXinApp extends DetailBaseApp {
                     String city = shopTabElements.get(0).text();
                     String phone = shopTabElements.get(1).attr("data-mobile");
 
-                    BizVo bizVo = new BizVo();
-                    bizVo.setId("" + i);
-                    bizVo.setCity(city);
-                    bizVo.setName(name);
-                    bizVo.setName(address);
-                    bizVo.setPhone(phone);
-                    bizVo.setUrl(url);
+                    ShopVo shopVo = new ShopVo();
+                    shopVo.setId("" + i);
+                    shopVo.setCity(city);
+                    shopVo.setName(name);
+                    shopVo.setAddress(address);
+                    shopVo.setPhone(phone);
+                    shopVo.setUrl(url);
                     try {
                         String carSum = doc.select(".shop-con .car-upper span em").text();
-                        bizVo.setCarSum(Integer.valueOf(carSum));
+                        shopVo.setCarSum(Integer.valueOf(carSum));
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-
-                    System.out.println("info: " + name + ", " + address + ", " + city + ", " + phone);
-                    SpiderBase.logToFile("summary/" + SpiderEnum.youxin.name() + "_shop", dfDateTime.format(new Date()) + "\t" + city + "\t" + url + "\t" + name + "\t" + address + "\t" + phone);
-                    SpiderBase.logToFile("summary/" + SpiderEnum.youxin.name() + "_shop_json", JSON.toJSONString(bizVo));
+                    SpiderBase.logToFile(SpiderEnum.youxin.name() + "_shop", JSON.toJSONString(shopVo));
                 }
             } catch (Exception e) {
                 e.printStackTrace();

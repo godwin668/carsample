@@ -204,11 +204,11 @@ public class Che168Spider extends SpiderBase implements Spider {
             // 商家名称 bizName
             String bizName = merchantsTitleElement.html().replaceAll("\n", "").replaceFirst ("(?s)(?i).*?\\|</i>([^<]+).*", "$1");
             bizName = removeWhiteSpace(bizName);
-            carDetailVo.setBizName(bizName);
+            carDetailVo.setShopName(bizName);
 
             // 商家id bizId
             String bizId = detailUrl.replaceFirst(".*?dealer/(\\d+).*", "$1");
-            carDetailVo.setBizId(bizId);
+            carDetailVo.setShopId(bizId);
 
             // 帖子状态 status
             // TODO

@@ -24,6 +24,7 @@ public class YouxinSpider extends SpiderBase implements Spider {
 
     private static String URL_BASE = "http://www.xin.com";
     private static String URL_LIST_TEMPLATE = "http://www.xin.com/<city>/s/i<page>/";
+    private static String URL_SHOP_TEMPLATE = "http://www.xin.com/d/<shopId>.html";
 
     public YouxinSpider(String[] cityArr) {
         super(cityArr);
@@ -92,7 +93,53 @@ public class YouxinSpider extends SpiderBase implements Spider {
 
     @Override
     public List<CarVo> listByShopId(String shopId) {
-        return super.listByShopId(shopId);
+        List<CarVo> infoList = new ArrayList<CarVo>();
+        String shopUrl = URL_SHOP_TEMPLATE.replaceFirst("<shopId>", shopId);
+        int pageCount = getPageCount(shopUrl);
+        String city = "";
+        String regDateAndMileageRegex = "上牌(.*?)｜里程(.*?)万公里";
+        for (int i = 1; i <= pageCount; i++) {
+            String shopPageUrl = shopUrl + "?page=" + i;
+            Document doc = getDoc(shopPageUrl);
+            Elements infoElements = doc.select(".con-car .con");
+            if (null == infoElements || infoElements.size() < 1) {
+                SenderUtil.sendMessage(SenderUtil.MessageLevel.ERROR, "listByShopId: " + shopPageUrl);
+            }
+            if (StringUtils.isBlank(city)) {
+                city = doc.select(".shop-nav .fr .shop-tab .tab-key").get(0).text();
+            }
+            for (Element infoElement : infoElements) {
+                try {
+                    Element infoPadElement = infoElement.select(".pad").get(0);
+                    String infoHref = infoElement.select("a").get(1).attr("href");
+                    String infoName = infoPadElement.select("h2").text();
+                    String infoId = infoHref.replaceFirst("/[^/]+/([^/]*?)\\..*", "$1");
+                    String infoCity = city;
+                    String regDateAndMileageStr = infoPadElement.select("span").get(0).text();
+                    String infoRegDate = regDateAndMileageStr.replaceFirst(regDateAndMileageRegex, "$1").replaceFirst("/", "");
+                    String infoMileage = regDateAndMileageStr.replaceFirst(regDateAndMileageRegex, "$2");
+                    String infoPriceStr = infoPadElement.select("em").get(0).text();
+                    String infoPrice = infoPriceStr.replaceFirst("(.*?)万.*", "$1").replaceAll("¥", "");
+
+                    CarVo vo = new CarVo();
+                    vo.setSrc(SpiderEnum.youxin);
+                    vo.setCity(infoCity);
+                    vo.setSrcId(infoId);
+                    vo.setName(infoName);
+                    vo.setRegDate(infoRegDate);
+                    vo.setMileage(infoMileage);
+                    vo.setPrice(infoPrice);
+                    vo.setAddress(infoHref);
+                    vo.setShopId(shopId);
+                    infoList.add(vo);
+                    logToFile(dfDate.format(new Date()) + "/" + vo.getSrc().name().toLowerCase() + "_shop", JSON.toJSONString(vo));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    logToFile("error", e.toString());
+                }
+            }
+        }
+        return infoList;
     }
 
     public CarDetailVo getByUrl(CarVo carVo) {
@@ -100,7 +147,6 @@ public class YouxinSpider extends SpiderBase implements Spider {
         if (null == carVo) {
             return carDetailVo;
         }
-
         try {
             String detailUrl = URL_BASE + carVo.getAddress();
             Document detailDoc = getDoc(detailUrl);
@@ -214,11 +260,11 @@ public class YouxinSpider extends SpiderBase implements Spider {
             // 商家名称 bizName
             String bizName = merchantsTitleElement.html().replaceAll("\n", "").replaceFirst ("(?s)(?i).*?\\|</i>([^<]+).*", "$1");
             bizName = removeWhiteSpace(bizName);
-            carDetailVo.setBizName(bizName);
+            carDetailVo.setShopName(bizName);
 
             // 商家id bizId
             String bizId = detailUrl.replaceFirst(".*?dealer/(\\d+).*", "$1");
-            carDetailVo.setBizId(bizId);
+            carDetailVo.setShopId(bizId);
 
             // 帖子状态 status
             // TODO

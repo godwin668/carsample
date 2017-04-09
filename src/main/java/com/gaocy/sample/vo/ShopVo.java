@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSON;
 /**
  * Created by godwin on 2017-04-05.
  */
-public class BizVo {
+public class ShopVo {
 
     // ID
     private String id;

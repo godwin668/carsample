@@ -25,12 +25,12 @@ public class DetailChe168App extends DetailBaseApp {
             String spiderName = spider.getClass().getSimpleName().toLowerCase().replaceAll("spider", "");
             List<CarVo> carVoList = listCarVo(spiderEnum, city, dateStr);
             System.out.println(city + "_" + carVoList.size());
-            SpiderBase.logToFile("infodetail/summary", "[" + dfDateTime.format(new Date()) + "] Start processing " + spiderName + " " + city + ", info size: " + carVoList.size());
+            SpiderBase.logToFile("logs/" + dfDate.format(new Date()) + "_" + spiderName, "[SHOP CARDETAIL] [" + dfDateTime.format(new Date()) + "] Start processing " + spiderName + " " + city + ", info size: " + carVoList.size());
             for (CarVo carVo : carVoList) {
                 CarDetailVo carDetailVo = spider.getByUrl(carVo);
-                SpiderBase.logToFile("infodetail/" + spiderName + "/" + city, JSON.toJSONString(carDetailVo));
+                SpiderBase.logToFile("cardetail/" + spiderName + "/" + city, JSON.toJSONString(carDetailVo));
             }
-            SpiderBase.logToFile("infodetail/summary", "[" + dfDateTime.format(new Date()) + "] END processing " + spiderName + " " + city + ", info size: " + carVoList.size());
+            SpiderBase.logToFile("logs/" + dfDate.format(new Date()) + "_" + spiderName, "[SHOP CARDETAIL] [" + dfDateTime.format(new Date()) + "] END processing " + spiderName + " " + city + ", info size: " + carVoList.size());
         }
     }
 }

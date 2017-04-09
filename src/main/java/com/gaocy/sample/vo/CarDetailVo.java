@@ -1,7 +1,6 @@
 package com.gaocy.sample.vo;
 
 import com.alibaba.fastjson.JSON;
-import com.gaocy.sample.spider.SpiderEnum;
 
 import java.util.List;
 
@@ -33,8 +32,8 @@ public class CarDetailVo {
     // 看车地址 address
     // 图片 images
     // 身份类型 identity
-    // 商家名称 bizName
-    // 商家id bizId
+    // 商家名称 shopName
+    // 商家id shopId
     // 帖子状态 status
     // 帖子标签 tag
 
@@ -111,10 +110,10 @@ public class CarDetailVo {
     private String identity;
 
     // 商家id
-    private String bizId;
+    private String shopId;
 
     // 商家名称
-    private String bizName;
+    private String shopName;
 
     // 帖子状态
     private String status;
@@ -315,20 +314,20 @@ public class CarDetailVo {
         this.identity = identity;
     }
 
-    public String getBizName() {
-        return bizName;
+    public String getShopName() {
+        return shopName;
     }
 
-    public void setBizName(String bizName) {
-        this.bizName = bizName;
+    public void setShopName(String shopName) {
+        this.shopName = shopName;
     }
 
-    public String getBizId() {
-        return bizId;
+    public String getShopId() {
+        return shopId;
     }
 
-    public void setBizId(String bizId) {
-        this.bizId = bizId;
+    public void setShopId(String shopId) {
+        this.shopId = shopId;
     }
 
     public String getStatus() {
