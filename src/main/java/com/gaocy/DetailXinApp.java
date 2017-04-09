@@ -23,14 +23,20 @@ import java.util.*;
 public class DetailXinApp extends DetailBaseApp {
 
     public static void main(String[] args) {
+        boolean SWITCH_GRAB_SHOP = false;
+        boolean SWITCH_CAR_LIST = false;
+        boolean SWITCH_CAR_DETAIL = true;
+
         // 抓取所有店铺信息
-        List<String> shopIdList = new ArrayList<String>();
-        List<ShopVo> shopVoList = listShop(null);
-        for (ShopVo shopVo : shopVoList) {
-            String shopId = shopVo.getId();
-            shopIdList.add(shopId);
+        if (SWITCH_GRAB_SHOP) {
+            List<String> shopIdList = new ArrayList<String>();
+            List<ShopVo> shopVoList = listShop(null);
+            for (ShopVo shopVo : shopVoList) {
+                String shopId = shopVo.getId();
+                shopIdList.add(shopId);
+            }
+            grabAllShop(shopIdList);
         }
-        grabAllShop(shopIdList);
 
         // 读取指定城市店铺信息
         String[] cityArr = new String[] { "北京", "长沙", "重庆", "石家庄", "天津" };
@@ -43,22 +49,26 @@ public class DetailXinApp extends DetailBaseApp {
         // 获取指定店铺车源列表
         Spider spider = SpiderFactory.getSpider(SpiderEnum.youxin, cityArr);
         String spiderName = spider.getClass().getSimpleName().toLowerCase().replaceAll("spider", "");
-        for (ShopVo shopVo : shopList) {
-            String shopId = shopVo.getId();
-            List<CarVo> shopCarList = spider.listByShopId(shopId);
-            SpiderBase.logToFile("logs/" + dfDate.format(new Date()) + "_" + SpiderEnum.youxin.name(), "[SHOP CARLIST] [" + dfDateTime.format(new Date()) + "] [" + shopVo.getCity() + "] " + shopVo.getName() + "(" + shopId + ") has " + shopCarList.size() + "(" + shopVo.getCarSum() + ") cars.");
+        if (SWITCH_CAR_LIST) {
+            for (ShopVo shopVo : shopList) {
+                String shopId = shopVo.getId();
+                List<CarVo> shopCarList = spider.listByShopId(shopId);
+                SpiderBase.logToFile("logs/" + dfDate.format(new Date()) + "_" + SpiderEnum.youxin.name(), "[SHOP CARLIST] [" + dfDateTime.format(new Date()) + "] [" + shopVo.getCity() + "] " + shopVo.getName() + "(" + shopId + ") has " + shopCarList.size() + "(" + shopVo.getCarSum() + ") cars.");
+            }
         }
 
         // 根据车源列表信息获取车源详情
         String dateStr = dfDate.format(new Date());
-        for (String city : cityArr) {
-            List<CarVo> carVoList = listCarVo(SpiderEnum.youxin, city, dateStr);
-            SpiderBase.logToFile("logs/" + dfDate.format(new Date()) + "_" + spiderName, "[SHOP CARDETAIL] [" + dfDateTime.format(new Date()) + "] Start processing " + spiderName + " " + city + ", info size: " + carVoList.size());
-            for (CarVo carVo : carVoList) {
-                CarDetailVo carDetailVo = spider.getByUrl(carVo);
-                SpiderBase.logToFile("cardetail/" + spiderName + "/" + city, JSON.toJSONString(carDetailVo));
+        if (SWITCH_CAR_DETAIL) {
+            for (String city : cityArr) {
+                List<CarVo> carVoList = listCarVo(SpiderEnum.youxin, city, dateStr);
+                SpiderBase.logToFile("logs/" + dfDate.format(new Date()) + "_" + spiderName, "[SHOP CARDETAIL] [" + dfDateTime.format(new Date()) + "] Start processing " + spiderName + " " + city + ", info size: " + carVoList.size());
+                for (CarVo carVo : carVoList) {
+                    CarDetailVo carDetailVo = spider.getByUrl(carVo);
+                    SpiderBase.logToFile("cardetail/" + spiderName + "/" + city, JSON.toJSONString(carDetailVo));
+                }
+                SpiderBase.logToFile("logs/" + dfDate.format(new Date()) + "_" + spiderName, "[SHOP CARDETAIL] [" + dfDateTime.format(new Date()) + "] END processing " + spiderName + " " + city + ", info size: " + carVoList.size());
             }
-            SpiderBase.logToFile("logs/" + dfDate.format(new Date()) + "_" + spiderName, "[SHOP CARDETAIL] [" + dfDateTime.format(new Date()) + "] END processing " + spiderName + " " + city + ", info size: " + carVoList.size());
         }
     }
 

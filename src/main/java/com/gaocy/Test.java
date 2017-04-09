@@ -18,16 +18,8 @@ public class Test {
 
     public static void main(String[] args) {
         try {
-            String host = "idocv.com";
-            CircularFifoQueue<KeyValue<Long, Integer>> hostAccessQueue = hostAccessQueueMap.get(host);
-            if (null == hostAccessQueue) {
-                hostAccessQueue = new CircularFifoQueue<KeyValue<Long, Integer>>(3);
-                hostAccessQueueMap.put(host, hostAccessQueue);
-            }
-            add(hostAccessQueue);
-            add(hostAccessQueue);
-            add(hostAccessQueue);
-            add(hostAccessQueue);
+            String s = "当前位置： 首页> 天津二手车> 天津本田二手车> 天津二手本田思域>本田 思域 2006款 1.8L 手动 VTi豪华版(国Ⅲ)";
+            System.out.println(s.replaceFirst(".*>([^>]+)", "$1"));
         } catch (Exception e) {
             e.printStackTrace();
         }

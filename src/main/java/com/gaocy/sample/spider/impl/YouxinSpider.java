@@ -143,6 +143,9 @@ public class YouxinSpider extends SpiderBase implements Spider {
     }
 
     public CarDetailVo getByUrl(CarVo carVo) {
+        // 不同页面示例：
+        // 1. http://www.xin.com/beijing/che91003836.html
+        // 2. http://www.xin.com/beijing/che14594253.html
         CarDetailVo carDetailVo = new CarDetailVo();
         if (null == carVo) {
             return carDetailVo;
@@ -150,23 +153,20 @@ public class YouxinSpider extends SpiderBase implements Spider {
         try {
             String detailUrl = URL_BASE + carVo.getAddress();
             Document detailDoc = getDoc(detailUrl);
-            Elements breadNavDoc = detailDoc.select(".breadnav a");
-            String cityName = breadNavDoc.get(1).text();
+            Elements breadNavDoc = detailDoc.select(".cd_m_nav a");
+            String cityName = breadNavDoc.get(1).text().replaceAll("二手车", "");
 
-            String carAddressStr = detailDoc.select(".car-address").text().replaceAll("&nbsp;", "").trim();
-            carAddressStr = removeWhiteSpace(carAddressStr);
-            String carAddressRegex = "看车地点:(.*?)联系人:(.*?)发布时间:(.*)";
-
-            Element merchantsTitleElement = detailDoc.select(".merchants-info .merchants-title").get(0);
+            String htmlStr = detailDoc.html();
+            String jsonInfoRegex = "(?i)(?s).*?(\\{[^\\}]+'城市': '([^']+)','车辆ID':'([^']+)', '店铺ID':'([^']+)', '是否半价':'([^']+)'[^\\}]+}).*";
 
             // 平台来源 src
-            carDetailVo.setSrc(SpiderEnum.che168.name());
+            carDetailVo.setSrc(SpiderEnum.youxin.name());
 
             // 城市 city
             carDetailVo.setCity(carVo.getCity());
 
             // 帖子ID id
-            carDetailVo.setId(carVo.getSrcId());
+            carDetailVo.setId(carVo.getSrcId().replaceAll("che", ""));
 
             // 原帖链接 url
             carDetailVo.setUrl(carVo.getAddress());
@@ -174,103 +174,92 @@ public class YouxinSpider extends SpiderBase implements Spider {
             // 名称 name
             carDetailVo.setName(carVo.getName());
 
-            // 品牌ID brandId
-            String brandId = detailDoc.select("#car_brandid").attr("value");
-            carDetailVo.setBrandId(brandId);
-
             // 品牌名称 brandName
-            String brandName = breadNavDoc.get(2).text().replace("二手", "");
+            String brandName = breadNavDoc.get(2).text().replace("二手车", "").replaceFirst(cityName, "");
             carDetailVo.setBrandName(brandName);
 
-            // 车系ID seriesId
-            String seriesId = detailDoc.select("#car_seriesid").attr("value");                             // 车系ID
-            carDetailVo.setBrandId(seriesId);
-
             // 车系名称 seriesName
-            String seriesName = breadNavDoc.get(3).text().replace("二手", "");                            // 车系名称
+            String seriesName = breadNavDoc.get(3).text().replace("二手", "").replaceFirst(cityName, "");   // 车系名称
             carDetailVo.setSeriesName(seriesName);
 
-            // 车型ID modelId
-            String modelId = breadNavDoc.get(4).attr("href").replaceFirst(".*?/s(\\d+)/.*", "$1");       // 车型ID
-            carDetailVo.setModelId(modelId);
-
             // 车型名称 modelName
-            String modelName = breadNavDoc.get(4).text().replace("二手", "");                             // 车型名称
+            String modelName = detailDoc.select(".cd_m_nav").text().replaceFirst(".*>([^>]+)", "$1");  // 车型名称
             carDetailVo.setModelName(modelName);
 
             // 车辆颜色 color
-            String color = detailDoc.select("#anchor02 .infotext-list li").get(3).text().replaceFirst(".*?：(.*)", "$1");
+            String color = detailDoc.select(".cd_m_i_pz dl").get(1).select("dd").get(2).select(".cd_m_i_pz_val .cd_m_innerlink1").get(0).text();
             carDetailVo.setColor(removeWhiteSpace(color));
 
             // 行驶里程 mileage
-            Elements detailsElements = detailDoc.select(".details ul li");
-            String mileage = detailsElements.get(0).text().replaceFirst("(.*?)万公里.*", "$1");
-            carDetailVo.setMileage(mileage);
+            carDetailVo.setMileage(carVo.getMileage());
 
             // 排量
-            String displacement = detailsElements.get(2).text().replaceFirst("(.*?)／(.*?)挡位.*", "$2");
+            String displacement = detailDoc.select(".cd_m_info_desc .cd_m_info_desc_val").get(4).text().replaceFirst("(.*?)/(.*)", "$1");
             carDetailVo.setDisplacement(displacement);
 
             // 变速箱
-            String gearBox = detailsElements.get(2).text().replaceFirst("(.*?)／(.*?)挡位.*", "$1");
+            String gearBox = detailDoc.select(".cd_m_info_desc .cd_m_info_desc_val").get(4).text().replaceFirst("(.*?)/(.*)", "$2");
             carDetailVo.setGearBox(gearBox);
 
             // 价格 price
             carDetailVo.setPrice(carVo.getPrice());
 
             // 发布时间 postDate
-            String postDate = carAddressStr.replaceFirst(carAddressRegex, "$3").replaceAll("-", "").trim();
+            String postDate = detailDoc.select(".cd_m_info_desc .cd_m_info_desc_val").get(2).text().replaceAll("-", "");
             carDetailVo.setPostDate(postDate);
 
             // 上牌时间 regDate
-            String regDate = detailsElements.get(1).text().replaceAll("-", "").replaceFirst("(\\d+).*", "$1");
+            String regDate = detailDoc.select(".cd_m_info_desc .cd_m_info_desc_val").get(1).text().replaceAll("-", "");
             carDetailVo.setRegDate(regDate);
 
             // 联系人 contact
-            String userName = carAddressStr.replaceFirst(carAddressRegex, "$2").trim().replaceAll("&nbsp;", "");
-            carDetailVo.setUserName(userName);
+            // NOT Exist
 
             // 联系电话 phone
-            try {
-                String phone = detailDoc.select(".car-results .btn-iphone3").get(0).text().replace("-", "").replaceFirst(".*?(\\d+).*", "$1");
-                carDetailVo.setPhone(phone);
-            } catch (Exception e) {
-                logToFile("error", "[no phone] " + detailUrl);
-            }
+            // NOT Exist
 
             // 看车地址 address
-            String address = carAddressStr.replaceFirst(carAddressRegex, "$1").trim();
+            String address = detailDoc.select(".cd_m_info_desc .cd_m_info_desc_val").get(5).text();
             carDetailVo.setAddress(address);
 
             // 图片 images
-            Elements imageElements = detailDoc.select(".fc-piclist ul li img");
+            Elements imageElements = detailDoc.select(".cd_m_i_imglist img");
             if (null != imageElements && imageElements.size() > 0) {
                 List<String> imageUrlList = new ArrayList<String>();
                 for (Element imageElement : imageElements) {
-                    String imageUrl = imageElement.attr("src2");
+                    String imageUrl = imageElement.attr("data-src");
                     imageUrlList.add(imageUrl);
                 }
                 carDetailVo.setImages(imageUrlList);
             }
 
             // 身份类型 identity
-            String identity = merchantsTitleElement.select(".name").text();
-            carDetailVo.setIdentity(identity);
+            // carDetailVo.setIdentity(identity);
 
-            // 商家名称 bizName
-            String bizName = merchantsTitleElement.html().replaceAll("\n", "").replaceFirst ("(?s)(?i).*?\\|</i>([^<]+).*", "$1");
-            bizName = removeWhiteSpace(bizName);
-            carDetailVo.setShopName(bizName);
+            // 商家名称 shopName
+            // carDetailVo.setShopName();
 
-            // 商家id bizId
-            String bizId = detailUrl.replaceFirst(".*?dealer/(\\d+).*", "$1");
-            carDetailVo.setShopId(bizId);
+            // 商家id shopId
+            String shopId = htmlStr.replaceFirst(jsonInfoRegex, "$3");
+            carDetailVo.setShopId(shopId);
 
             // 帖子状态 status
-            // TODO
+            Elements isSoldElements = detailDoc.select(".cd_m_info_cover_ys");
+            carDetailVo.setStatus((null != isSoldElements && isSoldElements.size() > 0) ? "已售" : "在售");
 
             // 帖子标签 tag
-            // TODO
+            Elements isYouxinAuthElements = detailDoc.select(".cd_m_h_yxrz");
+            List<String> tags = new ArrayList<String>();
+            if (null != isYouxinAuthElements && isYouxinAuthElements.size() > 0) {
+                tags.add("优信认证");
+            }
+            Elements isHalfPayElements = detailDoc.select(".cd_m_info_cover_fyb");
+            if (null != isHalfPayElements && isHalfPayElements.size() > 0) {
+                tags.add("付一半");
+            }
+            if (tags.size() > 0) {
+                carDetailVo.setTag(tags);
+            }
         } catch (Exception e) {
             logToFile("error", "[CAR VO] " + JSON.toJSONString(carVo));
         }

@@ -119,7 +119,7 @@ public class CarDetailVo {
     private String status;
 
     // 帖子标签
-    private String tag;
+    private List<String> tags;
 
 
     public String getSrc() {
@@ -338,12 +338,12 @@ public class CarDetailVo {
         this.status = status;
     }
 
-    public String getTag() {
-        return tag;
+    public List<String> getTags() {
+        return tags;
     }
 
-    public void setTag(String tag) {
-        this.tag = tag;
+    public void setTag(List<String> tags) {
+        this.tags = tags;
     }
 
     @Override
