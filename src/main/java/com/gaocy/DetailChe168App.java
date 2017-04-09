@@ -7,6 +7,7 @@ import com.gaocy.sample.spider.SpiderEnum;
 import com.gaocy.sample.spider.SpiderFactory;
 import com.gaocy.sample.vo.CarDetailVo;
 import com.gaocy.sample.vo.CarVo;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Date;
 import java.util.List;
@@ -28,7 +29,9 @@ public class DetailChe168App extends DetailBaseApp {
             SpiderBase.logToFile("logs/" + dfDate.format(new Date()) + "_" + spiderName, "[SHOP CARDETAIL] [" + dfDateTime.format(new Date()) + "] Start processing " + spiderName + " " + city + ", info size: " + carVoList.size());
             for (CarVo carVo : carVoList) {
                 CarDetailVo carDetailVo = spider.getByUrl(carVo);
-                SpiderBase.logToFile("cardetail/" + spiderName + "/" + city, JSON.toJSONString(carDetailVo));
+                if (null != carDetailVo && StringUtils.isNoneBlank(carDetailVo.getId())) {
+                    SpiderBase.logToFile("cardetail/" + spiderName + "/" + city, JSON.toJSONString(carDetailVo));
+                }
             }
             SpiderBase.logToFile("logs/" + dfDate.format(new Date()) + "_" + spiderName, "[SHOP CARDETAIL] [" + dfDateTime.format(new Date()) + "] END processing " + spiderName + " " + city + ", info size: " + carVoList.size());
         }
