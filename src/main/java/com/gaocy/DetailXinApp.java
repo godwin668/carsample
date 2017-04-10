@@ -23,6 +23,7 @@ import java.util.*;
 public class DetailXinApp extends DetailBaseApp {
 
     public static void main(String[] args) {
+        // shop2CarDetail();
         String dateStr = "20170407";
         SpiderEnum spiderEnum = SpiderEnum.youxin;
         String[] cityArr = new String[] { "北京", "长沙", "重庆", "石家庄", "天津" };
@@ -52,13 +53,7 @@ public class DetailXinApp extends DetailBaseApp {
 
         // 抓取所有店铺信息
         if (SWITCH_GRAB_SHOP) {
-            List<String> shopIdList = new ArrayList<String>();
-            List<ShopVo> shopVoList = listShop(null);
-            for (ShopVo shopVo : shopVoList) {
-                String shopId = shopVo.getId();
-                shopIdList.add(shopId);
-            }
-            grabAllShop(shopIdList);
+            grabAllShop(null);
         }
 
         // 读取指定城市店铺信息
@@ -190,8 +185,8 @@ public class DetailXinApp extends DetailBaseApp {
                 if (((null != shopTitleElements) && (shopTitleElements.size() > 0)) && ((null != shopTabElements) && (shopTabElements.size() > 1))) {
                     String name = shopTitleElements.select(".name").get(0).text();
                     String address = shopTitleElements.select(".ads").get(0).text();
-                    String city = shopTabElements.get(0).text();
-                    String phone = shopTabElements.get(1).attr("data-mobile");
+                    String city = shopTabElements.get(shopTabElements.size() - 2).text();
+                    String phone = shopTabElements.get(shopTabElements.size() - 1).attr("data-mobile");
 
                     ShopVo shopVo = new ShopVo();
                     shopVo.setId("" + i);
