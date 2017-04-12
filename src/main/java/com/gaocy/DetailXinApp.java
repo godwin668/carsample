@@ -26,7 +26,7 @@ public class DetailXinApp extends DetailBaseApp {
         // shop2CarDetail();
         String dateStr = "20170407";
         SpiderEnum spiderEnum = SpiderEnum.youxin;
-        String[] cityArr = new String[] { "北京", "长沙", "重庆", "石家庄", "天津" };
+        String[] cityArr = CityUtil.getAllCityNameBySpider(spiderEnum).toArray(new String[] {});
         for (String city : cityArr) {
             Spider spider = SpiderFactory.getSpider(spiderEnum, new String[] { city });
             String spiderName = spider.getClass().getSimpleName().toLowerCase().replaceAll("spider", "");

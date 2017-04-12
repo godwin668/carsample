@@ -5,6 +5,7 @@ import com.gaocy.sample.spider.Spider;
 import com.gaocy.sample.spider.SpiderBase;
 import com.gaocy.sample.spider.SpiderEnum;
 import com.gaocy.sample.spider.SpiderFactory;
+import com.gaocy.sample.util.CityUtil;
 import com.gaocy.sample.vo.CarDetailVo;
 import com.gaocy.sample.vo.CarVo;
 import org.apache.commons.lang3.StringUtils;
@@ -20,7 +21,8 @@ public class DetailChe168App extends DetailBaseApp {
     public static void main(String[] args) {
         String dateStr = "20170407";
         SpiderEnum spiderEnum = SpiderEnum.che168;
-        String[] cityArr = new String[] { "北京", "长沙", "重庆", "石家庄", "天津" };
+        // String[] cityArr = new String[] { "北京", "长沙", "重庆", "石家庄", "天津" };
+        String[] cityArr = CityUtil.getAllCityNameBySpider(spiderEnum).toArray(new String[] {});
         for (String city : cityArr) {
             Spider spider = SpiderFactory.getSpider(spiderEnum, new String[] { city });
             String spiderName = spider.getClass().getSimpleName().toLowerCase().replaceAll("spider", "");
