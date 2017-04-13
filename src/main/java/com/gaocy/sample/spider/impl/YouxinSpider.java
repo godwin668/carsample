@@ -64,6 +64,10 @@ public class YouxinSpider extends SpiderBase implements Spider {
                         String infoName = titleElement.text();
                         String infoId = titleElement.attr("data-carid");
                         String infoCity = infoHref.replaceFirst("/(\\w+)/(\\w+).html", "$1");
+                        String infoCityName = CityUtil.getName(SpiderEnum.youxin, infoCity);
+                        if (!cityName.equals(infoCityName)) {
+                            continue;
+                        }
                         String regDateAndMileageStr = infoPadElement.select("span").get(0).text();
                         String infoRegDate = regDateAndMileageStr.replaceFirst(regDateAndMileageRegex, "$1").replaceFirst("/", "");
                         String infoMileage = regDateAndMileageStr.replaceFirst(regDateAndMileageRegex, "$2");

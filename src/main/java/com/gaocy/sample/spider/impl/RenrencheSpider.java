@@ -63,6 +63,10 @@ public class RenrencheSpider extends SpiderBase implements Spider {
                     String infoName = infoElement.select("a h3").get(0).text();
                     String infoHref = infoElement.select("a").get(0).attr("href");
                     String infoCity = infoHref.replaceFirst("/(\\w+)/.*", "$1");
+                    String infoCityName = CityUtil.getName(SpiderEnum.renrenche, infoCity);
+                    if (!cityName.equals(infoCityName)) {
+                        continue;
+                    }
                     String infoId = infoHref.replaceFirst("/(\\w+)/car/(\\w+)", "$2");
                     String infoRegDateMileageStr = infoElement.select("a .mileage .basic").get(0).text();
                     String infoRegDate = infoRegDateMileageStr.replaceFirst(mileageTimeCityRegex, "$1$2");

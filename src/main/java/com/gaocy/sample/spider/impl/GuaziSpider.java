@@ -58,6 +58,10 @@ public class GuaziSpider extends SpiderBase implements Spider {
                     String infoName = infoElement.select(".list-infoBox .infoBox a").get(0).text();
                     String infoHref = infoElement.select(".list-infoBox .infoBox a").get(0).attr("href");
                     String infoCity = infoHref.replaceFirst("/(\\w+)/(\\w+).htm", "$1");
+                    String infoCityName = CityUtil.getName(SpiderEnum.guazi, infoCity);
+                    if (!cityName.equals(infoCityName)) {
+                        continue;
+                    }
                     String infoId = infoHref.replaceFirst("/(\\w+)/(\\w+).htm", "$2");
                     String infoRegDateStr = infoElement.select(".list-infoBox .fc-gray span").get(0).text().replaceAll("上牌", "");
                     String infoRegDate = infoRegDateStr.replaceFirst("(\\d+)年(\\d+)月", "$1$2");

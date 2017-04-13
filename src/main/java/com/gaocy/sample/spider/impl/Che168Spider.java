@@ -60,6 +60,9 @@ public class Che168Spider extends SpiderBase implements Spider {
                     String infoHref = infoElement.select("a").get(0).attr("href");
                     String mileageTimeCityStr = infoElement.select(".list-photo-info .time").get(0).text();   // 2万公里／2015-12／北京
                     String infoCity = mileageTimeCityStr.replaceFirst(mileageTimeCityRegex, "$3");
+                    if (!cityName.equals(infoCity)) {
+                        continue;
+                    }
                     String infoId = infoHref.replaceFirst(".*?/(\\d+).html.*", "$1");
                     String infoRegDate = mileageTimeCityStr.replaceFirst(mileageTimeCityRegex, "$2").replaceAll("-", "");
                     String infoMileage = mileageTimeCityStr.replaceFirst(mileageTimeCityRegex, "$1");
@@ -123,7 +126,7 @@ public class Che168Spider extends SpiderBase implements Spider {
             carDetailVo.setBrandId(brandId);
 
             // 品牌名称 brandName
-            String brandName = breadNavDoc.get(2).text().replace("二手", "");
+            String brandName = breadNavDoc.get(breadNavDoc.size() - 3).text().replace("二手车", "").replace("二手", "");
             carDetailVo.setBrandName(brandName);
 
             // 车系ID seriesId
@@ -131,15 +134,15 @@ public class Che168Spider extends SpiderBase implements Spider {
             carDetailVo.setBrandId(seriesId);
 
             // 车系名称 seriesName
-            String seriesName = breadNavDoc.get(3).text().replace("二手", "");                            // 车系名称
+            String seriesName = breadNavDoc.get(breadNavDoc.size() - 2).text().replace("二手车", "").replace("二手", "");                            // 车系名称
             carDetailVo.setSeriesName(seriesName);
 
             // 车型ID modelId
-            String modelId = breadNavDoc.get(4).attr("href").replaceFirst(".*?/s(\\d+)/.*", "$1");       // 车型ID
+            String modelId = breadNavDoc.get(breadNavDoc.size() - 1).attr("href").replaceFirst(".*?/s(\\d+)/.*", "$1");       // 车型ID
             carDetailVo.setModelId(modelId);
 
             // 车型名称 modelName
-            String modelName = breadNavDoc.get(4).text().replace("二手", "");                             // 车型名称
+            String modelName = breadNavDoc.get(breadNavDoc.size() - 1).text().replace("二手车", "").replace("二手", "");                             // 车型名称
             carDetailVo.setModelName(modelName);
 
             // 车辆颜色 color
