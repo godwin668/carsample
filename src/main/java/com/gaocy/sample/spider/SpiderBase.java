@@ -57,7 +57,7 @@ public class SpiderBase {
 
     public static Document getDoc(String url) {
         Document doc = null;
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 3; i++) {
             try {
                 if ("jsoup".equalsIgnoreCase(spiderConnector)) {
                     doc = getDocByJsoup(url);
@@ -67,7 +67,7 @@ public class SpiderBase {
                 break;
             } catch (Exception e) {
                 try {
-                    Thread.sleep(5000);
+                    Thread.sleep(4000);
                 } catch (Exception e1) {
                     e1.printStackTrace();
                 }
