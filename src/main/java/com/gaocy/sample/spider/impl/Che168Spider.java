@@ -50,6 +50,10 @@ public class Che168Spider extends SpiderBase implements Spider {
         for (int i = 1; i <= pageCount; i++) {
             String listUrl = url.replaceFirst("<page>", "" + i);
             Document doc = getDoc(listUrl);
+            if (null == doc) {
+                SenderUtil.sendMessage(SenderUtil.MessageLevel.ERROR, "listByCity doc: " + listUrl);
+                continue;
+            }
             Elements infoElements = doc.select(".tab-content .list-photo ul li");
             if (null == infoElements || infoElements.size() < 1) {
                 SenderUtil.sendMessage(SenderUtil.MessageLevel.ERROR, "listByCity: " + listUrl);
@@ -227,19 +231,23 @@ public class Che168Spider extends SpiderBase implements Spider {
     public int getPageCount(String url) {
         url = url.replaceFirst("<page>", "1");
         int pageCount = 1;
-        Document doc = getDoc(url);
-        Elements pageLinkElements = doc.select(".page a");
-        if (null == pageLinkElements || pageLinkElements.size() < 1) {
-            SenderUtil.sendMessage(SenderUtil.MessageLevel.ERROR, "getPageCount: " + url);
-        }
-        for (Element pageLinkElement : pageLinkElements) {
-            String pageData = pageLinkElement.text();
-            if (null != pageData && pageData.matches("\\d+")) {
-                int curPage = Integer.valueOf(pageData);
-                if (curPage > pageCount) {
-                    pageCount = curPage;
+        try {
+            Document doc = getDoc(url);
+            Elements pageLinkElements = doc.select(".page a");
+            if (null == pageLinkElements || pageLinkElements.size() < 1) {
+                SenderUtil.sendMessage(SenderUtil.MessageLevel.ERROR, "getPageCount: " + url);
+            }
+            for (Element pageLinkElement : pageLinkElements) {
+                String pageData = pageLinkElement.text();
+                if (null != pageData && pageData.matches("\\d+")) {
+                    int curPage = Integer.valueOf(pageData);
+                    if (curPage > pageCount) {
+                        pageCount = curPage;
+                    }
                 }
             }
+        } catch (Exception e) {
+            SenderUtil.sendMessage(SenderUtil.MessageLevel.ERROR, "getPageCount: " + url);
         }
         return pageCount;
     }

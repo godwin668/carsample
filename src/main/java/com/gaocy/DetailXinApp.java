@@ -176,6 +176,9 @@ public class DetailXinApp extends DetailBaseApp {
             try {
                 String url = "http://www.xin.com/d/" + i + ".html";
                 Document doc = SpiderBase.getDoc(url);
+                if (null == doc) {
+                    continue;
+                }
                 int length = doc.toString().length();
                 if (length < 2000) {
                     continue;
