@@ -50,49 +50,60 @@ public class YouxinSpider extends SpiderBase implements Spider {
             String mileageUrl = url.replaceFirst("/s/", "/" + mileageUriSub + "/");
             int pageCount = getPageCount(mileageUrl);
             for (int i = 1; i <= pageCount; i++) {
-                String mileagePageUrl = mileageUrl.replaceFirst("<page>", "" + i);
-                Document doc = getDoc(mileagePageUrl);
-                if (null == doc) {
-                    SenderUtil.sendMessage(SenderUtil.MessageLevel.ERROR, "listByCity doc: " + mileagePageUrl);
-                    continue;
-                }
-                Elements infoElements = doc.select(".list-con").get(0).select(".con");
-                if (null == infoElements || infoElements.size() < 1) {
-                    SenderUtil.sendMessage(SenderUtil.MessageLevel.ERROR, "listByCity: " + mileagePageUrl);
-                }
-                for (Element infoElement : infoElements) {
-                    try {
-                        Element infoPadElement = infoElement.select(".pad").get(0);
-                        Element titleElement = infoPadElement.select(".tit").get(0);
-                        String infoHref = titleElement.attr("href");
-                        String infoName = titleElement.text();
-                        String infoId = titleElement.attr("data-carid");
-                        String infoCity = infoHref.replaceFirst("/(\\w+)/(\\w+).html", "$1");
-                        String infoCityName = CityUtil.getName(SpiderEnum.youxin, infoCity);
-                        if (!cityName.equals(infoCityName)) {
-                            continue;
-                        }
-                        String regDateAndMileageStr = infoPadElement.select("span").get(0).text();
-                        String infoRegDate = regDateAndMileageStr.replaceFirst(regDateAndMileageRegex, "$1").replaceFirst("/", "");
-                        String infoMileage = regDateAndMileageStr.replaceFirst(regDateAndMileageRegex, "$2");
-                        String infoPriceStr = infoPadElement.select("p").get(0).select("em").get(0).text();
-                        String infoPrice = infoPriceStr.replaceFirst("(.*?)万.*", "$1");
-
-                        CarVo vo = new CarVo();
-                        vo.setSrc(SpiderEnum.youxin);
-                        vo.setCity(CityUtil.getName(SpiderEnum.youxin, infoCity));
-                        vo.setSrcId(infoId);
-                        vo.setName(infoName);
-                        vo.setRegDate(infoRegDate);
-                        vo.setMileage(infoMileage);
-                        vo.setPrice(infoPrice);
-                        vo.setAddress(infoHref);
-                        infoList.add(vo);
-                        logToFile(dfDate.format(new Date()) + "/" + vo.getSrc().name().toLowerCase(), JSON.toJSONString(vo));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        logToFile("error", e.toString());
+                try {
+                    String mileagePageUrl = mileageUrl.replaceFirst("<page>", "" + i);
+                    Document doc = getDoc(mileagePageUrl);
+                    if (null == doc) {
+                        SenderUtil.sendMessage(SenderUtil.MessageLevel.ERROR, "listByCity doc: " + mileagePageUrl);
+                        continue;
                     }
+                    Elements listConElements = doc.select(".list-con");
+                    if (null == listConElements || listConElements.size() < 1) {
+                        SenderUtil.sendMessage(SenderUtil.MessageLevel.ERROR, "listByCity listConElements: " + mileagePageUrl);
+                        continue;
+                    }
+                    Elements infoElements = listConElements.get(0).select(".con");
+                    if (null == infoElements || infoElements.size() < 1) {
+                        SenderUtil.sendMessage(SenderUtil.MessageLevel.ERROR, "listByCity infoElements: " + mileagePageUrl);
+                        continue;
+                    }
+                    for (Element infoElement : infoElements) {
+                        try {
+                            Element infoPadElement = infoElement.select(".pad").get(0);
+                            Element titleElement = infoPadElement.select(".tit").get(0);
+                            String infoHref = titleElement.attr("href");
+                            String infoName = titleElement.text();
+                            String infoId = titleElement.attr("data-carid");
+                            String infoCity = infoHref.replaceFirst("/(\\w+)/(\\w+).html", "$1");
+                            String infoCityName = CityUtil.getName(SpiderEnum.youxin, infoCity);
+                            if (!cityName.equals(infoCityName)) {
+                                continue;
+                            }
+                            String regDateAndMileageStr = infoPadElement.select("span").get(0).text();
+                            String infoRegDate = regDateAndMileageStr.replaceFirst(regDateAndMileageRegex, "$1").replaceFirst("/", "");
+                            String infoMileage = regDateAndMileageStr.replaceFirst(regDateAndMileageRegex, "$2");
+                            String infoPriceStr = infoPadElement.select("p").get(0).select("em").get(0).text();
+                            String infoPrice = infoPriceStr.replaceFirst("(.*?)万.*", "$1");
+
+                            CarVo vo = new CarVo();
+                            vo.setSrc(SpiderEnum.youxin);
+                            vo.setCity(CityUtil.getName(SpiderEnum.youxin, infoCity));
+                            vo.setSrcId(infoId);
+                            vo.setName(infoName);
+                            vo.setRegDate(infoRegDate);
+                            vo.setMileage(infoMileage);
+                            vo.setPrice(infoPrice);
+                            vo.setAddress(infoHref);
+                            infoList.add(vo);
+                            logToFile(dfDate.format(new Date()) + "/" + vo.getSrc().name().toLowerCase(), JSON.toJSONString(vo));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            logToFile("error", e.toString());
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    logToFile("error", e.toString());
                 }
             }
         }
@@ -107,48 +118,53 @@ public class YouxinSpider extends SpiderBase implements Spider {
         String city = "";
         String regDateAndMileageRegex = "上牌(.*?)｜里程(.*?)万公里";
         for (int i = 1; i <= pageCount; i++) {
-            String shopPageUrl = shopUrl + "?page=" + i;
-            Document doc = getDoc(shopPageUrl);
-            if (null == doc) {
-                SenderUtil.sendMessage(SenderUtil.MessageLevel.ERROR, "listByShopId doc: " + shopPageUrl);
-                continue;
-            }
-            Elements infoElements = doc.select(".con-car .con");
-            if (null == infoElements || infoElements.size() < 1) {
-                SenderUtil.sendMessage(SenderUtil.MessageLevel.ERROR, "listByShopId: " + shopPageUrl);
-            }
-            if (StringUtils.isBlank(city)) {
-                city = doc.select(".shop-nav .fr .shop-tab .tab-key").get(0).text();
-            }
-            for (Element infoElement : infoElements) {
-                try {
-                    Element infoPadElement = infoElement.select(".pad").get(0);
-                    String infoHref = infoElement.select("a").get(1).attr("href");
-                    String infoName = infoPadElement.select("h2").text();
-                    String infoId = infoHref.replaceFirst("/[^/]+/([^/]*?)\\..*", "$1");
-                    String infoCity = city;
-                    String regDateAndMileageStr = infoPadElement.select("span").get(0).text();
-                    String infoRegDate = regDateAndMileageStr.replaceFirst(regDateAndMileageRegex, "$1").replaceFirst("/", "");
-                    String infoMileage = regDateAndMileageStr.replaceFirst(regDateAndMileageRegex, "$2");
-                    String infoPriceStr = infoPadElement.select("em").get(0).text();
-                    String infoPrice = infoPriceStr.replaceFirst("(.*?)万.*", "$1").replaceAll("¥", "");
-
-                    CarVo vo = new CarVo();
-                    vo.setSrc(SpiderEnum.youxin);
-                    vo.setCity(infoCity);
-                    vo.setSrcId(infoId);
-                    vo.setName(infoName);
-                    vo.setRegDate(infoRegDate);
-                    vo.setMileage(infoMileage);
-                    vo.setPrice(infoPrice);
-                    vo.setAddress(infoHref);
-                    vo.setShopId(shopId);
-                    infoList.add(vo);
-                    logToFile(dfDate.format(new Date()) + "/" + vo.getSrc().name().toLowerCase() + "_shop", JSON.toJSONString(vo));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    logToFile("error", e.toString());
+            try {
+                String shopPageUrl = shopUrl + "?page=" + i;
+                Document doc = getDoc(shopPageUrl);
+                if (null == doc) {
+                    SenderUtil.sendMessage(SenderUtil.MessageLevel.ERROR, "listByShopId doc: " + shopPageUrl);
+                    continue;
                 }
+                Elements infoElements = doc.select(".con-car .con");
+                if (null == infoElements || infoElements.size() < 1) {
+                    SenderUtil.sendMessage(SenderUtil.MessageLevel.ERROR, "listByShopId: " + shopPageUrl);
+                }
+                if (StringUtils.isBlank(city)) {
+                    city = doc.select(".shop-nav .fr .shop-tab .tab-key").get(0).text();
+                }
+                for (Element infoElement : infoElements) {
+                    try {
+                        Element infoPadElement = infoElement.select(".pad").get(0);
+                        String infoHref = infoElement.select("a").get(1).attr("href");
+                        String infoName = infoPadElement.select("h2").text();
+                        String infoId = infoHref.replaceFirst("/[^/]+/([^/]*?)\\..*", "$1");
+                        String infoCity = city;
+                        String regDateAndMileageStr = infoPadElement.select("span").get(0).text();
+                        String infoRegDate = regDateAndMileageStr.replaceFirst(regDateAndMileageRegex, "$1").replaceFirst("/", "");
+                        String infoMileage = regDateAndMileageStr.replaceFirst(regDateAndMileageRegex, "$2");
+                        String infoPriceStr = infoPadElement.select("em").get(0).text();
+                        String infoPrice = infoPriceStr.replaceFirst("(.*?)万.*", "$1").replaceAll("¥", "");
+
+                        CarVo vo = new CarVo();
+                        vo.setSrc(SpiderEnum.youxin);
+                        vo.setCity(infoCity);
+                        vo.setSrcId(infoId);
+                        vo.setName(infoName);
+                        vo.setRegDate(infoRegDate);
+                        vo.setMileage(infoMileage);
+                        vo.setPrice(infoPrice);
+                        vo.setAddress(infoHref);
+                        vo.setShopId(shopId);
+                        infoList.add(vo);
+                        logToFile(dfDate.format(new Date()) + "/" + vo.getSrc().name().toLowerCase() + "_shop", JSON.toJSONString(vo));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        logToFile("error", e.toString());
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                logToFile("error", e.toString());
             }
         }
         return infoList;
