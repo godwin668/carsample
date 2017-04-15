@@ -138,7 +138,7 @@ public class SpiderBase {
         if (null == str) {
             return null;
         }
-        return str.replace(String.valueOf((char) 160), "").replaceAll("\\s", "");
+        return str.replace(String.valueOf((char) 160), "").replaceAll("\\s", "").replaceAll("　", "");
     }
 
     @Override

@@ -13,9 +13,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by godwin on 2017-03-16.
@@ -221,7 +219,48 @@ public class Che168Spider extends SpiderBase implements Spider {
             // TODO
 
             // 帖子标签 tag
-            // TODO
+            List<String> tags = new ArrayList<String>();
+            Elements goldMedalElements = detailDoc.select(".tag-gold-medal");   // 金牌店铺
+            if (null != goldMedalElements && goldMedalElements.size() > 0) {
+                tags.add("金牌店铺");
+            }
+            Elements tagElements = detailDoc.select(".car-price .tag");
+            if (null != tagElements && tagElements.size() > 0) {
+                for (Element tagElement : tagElements) {
+                    tags.add(tagElement.text());
+                }
+            }
+            Elements financeElements = detailDoc.select(".car-finance .mark");
+            if (null != financeElements && financeElements.size() > 0) {
+                if (financeElements.toString().contains("分期购")) {
+                    tags.add("分期购");
+                }
+            }
+            Elements commitmentTagElements = detailDoc.select(".commitment-tag ul li span");
+            if (null != commitmentTagElements && commitmentTagElements.size() > 0) {
+                for (Element commitmentTagElement : commitmentTagElements) {
+                    tags.add(commitmentTagElement.text());
+                }
+            }
+
+            if (tags.size() > 0) {
+                carDetailVo.setTags(tags);
+            }
+
+            Map<String, String> paramMap = new HashMap<String, String>();
+            Elements basicInfoElements = detailDoc.select("#anchor01 ul li.grid-6");
+            if (null != basicInfoElements && basicInfoElements.size() > 0) {
+                for (Element basicInfoElement : basicInfoElements) {
+                    try {
+                        String key = basicInfoElement.text().replaceFirst("(.*?)：(.*)", "$1");
+                        String value = basicInfoElement.text().replaceFirst("(.*?)：(.*)", "$2");
+                        paramMap.put(removeWhiteSpace(key), removeWhiteSpace(value));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            carDetailVo.setParams(paramMap);
         } catch (Exception e) {
             logToFile("error", "[CAR VO] " + JSON.toJSONString(carVo));
         }
