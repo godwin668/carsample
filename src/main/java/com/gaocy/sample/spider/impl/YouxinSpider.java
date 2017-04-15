@@ -13,9 +13,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by godwin on 2017-03-02.
@@ -185,7 +183,8 @@ public class YouxinSpider extends SpiderBase implements Spider {
             String cityName = breadNavDoc.get(1).text().replaceAll("二手车", "");
 
             String htmlStr = detailDoc.html();
-            String jsonInfoRegex = "(?i)(?s).*?(\\{[^\\}]+'城市': '([^']+)','车辆ID':'([^']+)', '店铺ID':'([^']+)', '是否半价':'([^']+)'[^\\}]+}).*";
+            // String jsonInfoRegex = "(?i)(?s).*?(\\{[^\\}]+'城市': '([^']+)','车辆ID':'([^']+)', '店铺ID':'([^']+)', '是否半价':'([^']+)'[^\\}]+}).*";
+            String jsonInfoRegex = "(?s).*?'店铺ID':'([^']+)'.*";
 
             // 平台来源 src
             carDetailVo.setSrc(SpiderEnum.youxin.name());
@@ -268,7 +267,8 @@ public class YouxinSpider extends SpiderBase implements Spider {
             // carDetailVo.setShopName();
 
             // 商家id shopId
-            String shopId = htmlStr.replaceFirst(jsonInfoRegex, "$3");
+            // String shopId = htmlStr.replaceFirst(jsonInfoRegex, "$1");
+            String shopId = detailDoc.select(".store_click").get(0).attr("onclick").replaceFirst(".*?collect/\\d+/(\\d+).*", "$1");
             carDetailVo.setShopId(shopId);
 
             // 帖子状态 status
@@ -286,8 +286,32 @@ public class YouxinSpider extends SpiderBase implements Spider {
                 tags.add("付一半");
             }
             if (tags.size() > 0) {
-                carDetailVo.setTag(tags);
+                carDetailVo.setTags(tags);
             }
+
+            Elements guohuElements = detailDoc.select(".cd_m_info_sjgr");
+            Map<String, String> paramMap = new HashMap<String, String>();
+            if (null != guohuElements && guohuElements.size() > 0) {
+                String guohuStr = guohuElements.get(0).text();
+                if (guohuStr.contains("不含过户费")) {
+                    paramMap.put("过户费", "不含");
+                } else {
+                    paramMap.put("过户费", "含");
+                }
+            }
+            Elements paramElements = detailDoc.select(".cd_m_i_pz dl dd");
+            if (null != paramElements && paramElements.size() > 0) {
+                for (Element paramElement : paramElements) {
+                    try {
+                        String key = paramElement.select(".cd_m_i_pz_tit").get(0).text();
+                        String value = paramElement.select(".cd_m_i_pz_val").get(0).text();
+                        paramMap.put(key, value);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            carDetailVo.setParams(paramMap);
         } catch (Exception e) {
             logToFile("error", "[CAR VO] " + JSON.toJSONString(carVo));
         }

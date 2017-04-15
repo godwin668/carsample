@@ -3,6 +3,7 @@ package com.gaocy.sample.vo;
 import com.alibaba.fastjson.JSON;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by godwin on 2017-04-05.
@@ -120,6 +121,9 @@ public class CarDetailVo {
 
     // 帖子标签
     private List<String> tags;
+
+    // 其他参数
+    private Map<String, String> params;
 
 
     public String getSrc() {
@@ -342,8 +346,16 @@ public class CarDetailVo {
         return tags;
     }
 
-    public void setTag(List<String> tags) {
+    public void setTags(List<String> tags) {
         this.tags = tags;
+    }
+
+    public Map<String, String> getParams() {
+        return params;
+    }
+
+    public void setParams(Map<String, String> params) {
+        this.params = params;
     }
 
     @Override
