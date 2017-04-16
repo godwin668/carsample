@@ -57,32 +57,37 @@ public class HttpClientUtil {
         httpClientErrorTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                logger.info("[HttpClient Timer] running...");
-                SpiderBase.logToFile("httpclienttimer", "[" + dfDateTime.format(new Date()) + "] Start check httpClientIndexErrorCountMap(" + JSON.toJSONString(httpClientIndexErrorCountMap) + ")");
-                int curErrorClientSize = 0;
-                for(Iterator<Map.Entry<Integer, Integer>> it = httpClientIndexErrorCountMap.entrySet().iterator(); it.hasNext(); ) {
-                    Map.Entry<Integer, Integer> entry = it.next();
-                    Integer key = entry.getKey();
-                    Integer value = entry.getValue();
-                    if (null != key && null != value && value > 3) {
-                        String content = get("https://www.baidu.com/", key);
-                        if (null != content && content.contains("百度一下")) {
-                            logger.info("[HttpClient Back to Normal] HttpClient pool index " + key + " error count " + value + " recovered.");
-                            SpiderBase.logToFile("httpclientrecover", "[HttpClient NORMAL] client pool index " + key + " error count " + value + " back to OK");
-                            SpiderBase.logToFile("httpclienttimer", "[HttpClient NORMAL] client pool index " + key + " error count " + value + " back to OK");
-                            it.remove();
-                        } else {
-                            ++curErrorClientSize;
+                try {
+                    logger.info("[HttpClient Timer] running...");
+                    SpiderBase.logToFile("httpclienttimer", "[" + dfDateTime.format(new Date()) + "] Start check httpClientIndexErrorCountMap(" + JSON.toJSONString(httpClientIndexErrorCountMap) + ")");
+                    int curErrorClientSize = 0;
+                    for(Iterator<Map.Entry<Integer, Integer>> it = httpClientIndexErrorCountMap.entrySet().iterator(); it.hasNext(); ) {
+                        Map.Entry<Integer, Integer> entry = it.next();
+                        Integer key = entry.getKey();
+                        Integer value = entry.getValue();
+                        if (null != key && null != value && value > 3) {
+                            String content = get("https://www.baidu.com/", key);
+                            if (null != content && content.contains("百度一下")) {
+                                logger.info("[HttpClient Back to Normal] HttpClient pool index " + key + " error count " + value + " recovered.");
+                                SpiderBase.logToFile("httpclientrecover", "[HttpClient NORMAL] client pool index " + key + " error count " + value + " back to OK");
+                                SpiderBase.logToFile("httpclienttimer", "[HttpClient NORMAL] client pool index " + key + " error count " + value + " back to OK");
+                                it.remove();
+                            } else {
+                                ++curErrorClientSize;
+                            }
                         }
                     }
-                }
-                int validClientSize = httpClientPool.size() - curErrorClientSize;
-                if (validClientSize < 2) {
-                    SpiderBase.logToFile("httpclienterror", "[HttpClient POOL NOT sufficient] valid client percent: " + validClientSize + "/" + httpClientPool.size() + ", reset all...");
-                    httpClientIndexErrorCountMap.clear();
+                    int validClientSize = httpClientPool.size() - curErrorClientSize;
+                    if (validClientSize < 2) {
+                        SpiderBase.logToFile("httpclienterror", "[HttpClient POOL NOT sufficient] valid client percent: " + validClientSize + "/" + httpClientPool.size() + ", reset all...");
+                        httpClientIndexErrorCountMap.clear();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    SpiderBase.logToFile("httpclienttimer", "[" + dfDateTime.format(new Date()) + "] Timer run Exception: " + e.getMessage());
                 }
             }
-        }, 0, 300000);
+        }, 0, 120000);
     }
 
     public static void main(String args[]) {
@@ -128,10 +133,22 @@ public class HttpClientUtil {
         if (null != errorCount && errorCount > 3) {
             logger.warn("[HttpClient NOT available] client pool index " + curIndex + " error count " + errorCount);
             SpiderBase.logToFile("httpclienterror", "[HttpClient NOT available] client pool index " + curIndex + " error count " + errorCount);
-            try {
-                Thread.sleep(2000);
-            } catch (Exception e) {
-                e.printStackTrace();
+            int errorMapOverValveCount = 0;
+            Collection<Integer> errorValues = httpClientIndexErrorCountMap.values();
+            for (Integer errValue : errorValues) {
+                if (null != errorCount && errorCount > 3) {
+                    ++errorMapOverValveCount;
+                }
+            }
+            int validClientSize = httpClientPool.size() - errorMapOverValveCount;
+            if (validClientSize < 2) {
+                try {
+                    SpiderBase.logToFile("httpclienterror", "[HttpClient POOL NOT sufficient] valid client percent: " + validClientSize + "/" + httpClientPool.size() + ", reset all...");
+                    httpClientIndexErrorCountMap.clear();
+                    Thread.sleep(5000);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
             return getHttpClientIndex(url);
         }
