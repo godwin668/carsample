@@ -36,6 +36,6 @@
 		<appender-ref ref="STDOUT" />
 	</root>
 	
-	<logger name="com.gaocy" level="debug"/>
+	<logger name="com.gaocy" level="info"/>
 
 </configuration>
