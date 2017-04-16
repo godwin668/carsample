@@ -65,7 +65,7 @@ public class HttpClientUtil {
                         Map.Entry<Integer, Integer> entry = it.next();
                         Integer key = entry.getKey();
                         Integer value = entry.getValue();
-                        if (null != key && null != value && value > 3) {
+                        if (null != key && null != value && value > 5) {
                             String content = get("https://www.baidu.com/", key);
                             if (null != content && content.contains("百度一下")) {
                                 logger.info("[HttpClient Back to Normal] HttpClient pool index " + key + " error count " + value + " recovered.");
@@ -78,7 +78,7 @@ public class HttpClientUtil {
                         }
                     }
                     int validClientSize = httpClientPool.size() - curErrorClientSize;
-                    if (validClientSize < 2) {
+                    if (validClientSize < 4) {
                         SpiderBase.logToFile("httpclienterror", "[HttpClient POOL NOT sufficient] valid client percent: " + validClientSize + "/" + httpClientPool.size() + ", reset all...");
                         httpClientIndexErrorCountMap.clear();
                     }
@@ -87,7 +87,7 @@ public class HttpClientUtil {
                     SpiderBase.logToFile("httpclienttimer", "[" + dfDateTime.format(new Date()) + "] Timer run Exception: " + e.getMessage());
                 }
             }
-        }, 0, 120000);
+        }, 0, 18000);
     }
 
     public static void main(String args[]) {
@@ -130,22 +130,22 @@ public class HttpClientUtil {
             e.printStackTrace();
         }
         Integer errorCount = httpClientIndexErrorCountMap.get(curIndex);
-        if (null != errorCount && errorCount > 3) {
+        if (null != errorCount && errorCount > 5) {
             logger.warn("[HttpClient NOT available] client pool index " + curIndex + " error count " + errorCount);
             SpiderBase.logToFile("httpclienterror", "[HttpClient NOT available] client pool index " + curIndex + " error count " + errorCount);
             int errorMapOverValveCount = 0;
             Collection<Integer> errorValues = httpClientIndexErrorCountMap.values();
             for (Integer errValue : errorValues) {
-                if (null != errorCount && errorCount > 3) {
+                if (null != errorCount && errorCount > 5) {
                     ++errorMapOverValveCount;
                 }
             }
             int validClientSize = httpClientPool.size() - errorMapOverValveCount;
-            if (validClientSize < 2) {
+            if (validClientSize < 4) {
                 try {
                     SpiderBase.logToFile("httpclienterror", "[HttpClient POOL NOT sufficient] valid client percent: " + validClientSize + "/" + httpClientPool.size() + ", reset all...");
                     httpClientIndexErrorCountMap.clear();
-                    Thread.sleep(5000);
+                    Thread.sleep(3000);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
