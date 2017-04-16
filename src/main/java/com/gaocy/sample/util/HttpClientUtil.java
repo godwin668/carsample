@@ -59,6 +59,7 @@ public class HttpClientUtil {
             public void run() {
                 logger.info("[HttpClient Timer] running...");
                 SpiderBase.logToFile("httpclienttimer", "[" + dfDateTime.format(new Date()) + "] Start check httpClientIndexErrorCountMap(" + JSON.toJSONString(httpClientIndexErrorCountMap) + ")");
+                int curErrorClientSize = 0;
                 for(Iterator<Map.Entry<Integer, Integer>> it = httpClientIndexErrorCountMap.entrySet().iterator(); it.hasNext(); ) {
                     Map.Entry<Integer, Integer> entry = it.next();
                     Integer key = entry.getKey();
@@ -70,8 +71,15 @@ public class HttpClientUtil {
                             SpiderBase.logToFile("httpclientrecover", "[HttpClient NORMAL] client pool index " + key + " error count " + value + " back to OK");
                             SpiderBase.logToFile("httpclienttimer", "[HttpClient NORMAL] client pool index " + key + " error count " + value + " back to OK");
                             it.remove();
+                        } else {
+                            ++curErrorClientSize;
                         }
                     }
+                }
+                int validClientSize = httpClientPool.size() - curErrorClientSize;
+                if (validClientSize < 2) {
+                    SpiderBase.logToFile("httpclienterror", "[HttpClient POOL NOT sufficient] valid client percent: " + validClientSize + "/" + httpClientPool.size() + ", reset all...");
+                    httpClientIndexErrorCountMap.clear();
                 }
             }
         }, 0, 300000);
@@ -120,6 +128,11 @@ public class HttpClientUtil {
         if (null != errorCount && errorCount > 3) {
             logger.warn("[HttpClient NOT available] client pool index " + curIndex + " error count " + errorCount);
             SpiderBase.logToFile("httpclienterror", "[HttpClient NOT available] client pool index " + curIndex + " error count " + errorCount);
+            try {
+                Thread.sleep(2000);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             return getHttpClientIndex(url);
         }
         return curIndex;
