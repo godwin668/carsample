@@ -143,6 +143,24 @@ public class YouxinSpider extends SpiderBase implements Spider {
                         String infoPriceStr = infoPadElement.select("em").get(0).text();
                         String infoPrice = infoPriceStr.replaceFirst("(.*?)万.*", "$1").replaceAll("¥", "");
 
+                        Map<String, String> paramMap = new HashMap<String, String>();
+                        Elements halfPayElements = infoElement.select(".ico-hcar");
+                        boolean isHalfPay = false;
+                        if (null != halfPayElements && halfPayElements.size() > 0) {
+                            isHalfPay = true;
+                            paramMap.put("付一半", "是");
+                        } else {
+                            paramMap.put("付一半", "否");
+                        }
+                        Elements soldElements = infoElement.select(".collect-ico");
+                        boolean isSold = false;
+                        if (null != soldElements && soldElements.size() > 0) {
+                            isSold = true;
+                            paramMap.put("销售状态", "已售");
+                        } else {
+                            paramMap.put("销售状态", "在售");
+                        }
+
                         CarVo vo = new CarVo();
                         vo.setSrc(SpiderEnum.youxin);
                         vo.setCity(infoCity);
@@ -153,6 +171,7 @@ public class YouxinSpider extends SpiderBase implements Spider {
                         vo.setPrice(infoPrice);
                         vo.setAddress(infoHref);
                         vo.setShopId(shopId);
+                        vo.setParams(paramMap);
                         infoList.add(vo);
                         logToFile(dfDate.format(new Date()) + "/" + vo.getSrc().name().toLowerCase() + "_shop", JSON.toJSONString(vo));
                     } catch (Exception e) {

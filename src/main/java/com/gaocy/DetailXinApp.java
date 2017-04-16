@@ -23,25 +23,7 @@ import java.util.*;
 public class DetailXinApp extends DetailBaseApp {
 
     public static void main(String[] args) {
-        // shop2CarDetail();
-        String dateStr = "20170415";
-        SpiderEnum spiderEnum = SpiderEnum.youxin;
-        // String[] cityArr = CityUtil.getAllCityNameBySpider(spiderEnum).toArray(new String[] {});
-        String[] cityArr = { "北京", "上海", "苏州", "杭州", "宁波" };
-        for (String city : cityArr) {
-            Spider spider = SpiderFactory.getSpider(spiderEnum, new String[] { city });
-            String spiderName = spider.getClass().getSimpleName().toLowerCase().replaceAll("spider", "");
-            List<CarVo> carVoList = listCarVo(spiderEnum, city, dateStr);
-            System.out.println(city + "_" + carVoList.size());
-            SpiderBase.logToFile("logs/" + dfDate.format(new Date()) + "_" + spiderName, "[SHOP CARDETAIL] [" + dfDateTime.format(new Date()) + "] Start processing " + spiderName + " " + city + ", info size: " + carVoList.size());
-            for (CarVo carVo : carVoList) {
-                CarDetailVo carDetailVo = spider.getByUrl(carVo);
-                if (null != carDetailVo && StringUtils.isNoneBlank(carDetailVo.getId())) {
-                    SpiderBase.logToFile("cardetail/" + spiderName + "/" + city, JSON.toJSONString(carDetailVo));
-                }
-            }
-            SpiderBase.logToFile("logs/" + dfDate.format(new Date()) + "_" + spiderName, "[SHOP CARDETAIL] [" + dfDateTime.format(new Date()) + "] END processing " + spiderName + " " + city + ", info size: " + carVoList.size());
-        }
+        grabAllShop(null);
     }
 
     /**
@@ -167,6 +149,7 @@ public class DetailXinApp extends DetailBaseApp {
      * 抓取所有店铺
      */
     public static void grabAllShop(List<String> shopIdList) {
+        Spider spider = SpiderFactory.getSpider(SpiderEnum.youxin, null);
         if (null == shopIdList || shopIdList.size() < 1) {
             shopIdList = new ArrayList<String>();
             for (int i = 1; i < 65000; i++) {
@@ -174,8 +157,8 @@ public class DetailXinApp extends DetailBaseApp {
             }
         }
         for (String i : shopIdList) {
+            String url = "http://www.xin.com/d/" + i + ".html";
             try {
-                String url = "http://www.xin.com/d/" + i + ".html";
                 Document doc = SpiderBase.getDoc(url);
                 if (null == doc) {
                     continue;
@@ -199,15 +182,33 @@ public class DetailXinApp extends DetailBaseApp {
                     shopVo.setAddress(address);
                     shopVo.setPhone(phone);
                     shopVo.setUrl(url);
+
                     try {
+                        // 车源总数
                         String carSum = doc.select(".shop-con .car-upper span em").text();
                         shopVo.setCarSum(Integer.valueOf(carSum));
+
+                        // 在售车源数
+                        int onSaleSum = 0;
+                        List<CarVo> carVoList = spider.listByShopId("" + i);
+                        for (CarVo carVo : carVoList) {
+                            Map<String, String> params = carVo.getParams();
+                            if (null != params && "在售".equals(params.get("销售状态"))) {
+                                ++onSaleSum;
+                            } else {
+                                break;
+                            }
+                        }
+                        shopVo.setOnSaleSum(onSaleSum);
+                        shopVo.setSoldSum(Integer.valueOf(carSum) - onSaleSum);
                     } catch (Exception e) {
                         e.printStackTrace();
+                        SpiderBase.logToFile(SpiderEnum.youxin.name() + "_shop_error", "[" + dfDateTime.format(new Date()) + "] WARN " + url + ", error: " + e.getMessage());
                     }
                     SpiderBase.logToFile(SpiderEnum.youxin.name() + "_shop", JSON.toJSONString(shopVo));
                 }
             } catch (Exception e) {
+                SpiderBase.logToFile(SpiderEnum.youxin.name() + "_shop_error", "[" + dfDateTime.format(new Date()) + "] ERROR " + url + ", error: " + e.getMessage());
                 e.printStackTrace();
             }
         }

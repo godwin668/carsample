@@ -28,6 +28,12 @@ public class ShopVo {
     // 车辆数
     private int carSum;
 
+    // 在售数
+    private int onSaleSum;
+
+    // 已售数
+    private int soldSum;
+
     public String getId() {
         return id;
     }
@@ -82,6 +88,22 @@ public class ShopVo {
 
     public void setCarSum(int carSum) {
         this.carSum = carSum;
+    }
+
+    public int getOnSaleSum() {
+        return onSaleSum;
+    }
+
+    public void setOnSaleSum(int onSaleSum) {
+        this.onSaleSum = onSaleSum;
+    }
+
+    public int getSoldSum() {
+        return soldSum;
+    }
+
+    public void setSoldSum(int soldSum) {
+        this.soldSum = soldSum;
     }
 
     @Override

@@ -3,6 +3,8 @@ package com.gaocy.sample.vo;
 import com.alibaba.fastjson.JSON;
 import com.gaocy.sample.spider.SpiderEnum;
 
+import java.util.Map;
+
 /**
  * Created by godwin on 2017-03-16.
  */
@@ -17,6 +19,7 @@ public class CarVo {
     private String price;
     private String address;
     private String shopId;
+    private Map<String, String> params;
 
     public SpiderEnum getSrc() {
         return src;
@@ -96,6 +99,14 @@ public class CarVo {
 
     public void setShopId(String shopId) {
         this.shopId = shopId;
+    }
+
+    public Map<String, String> getParams() {
+        return params;
+    }
+
+    public void setParams(Map<String, String> params) {
+        this.params = params;
     }
 
     @Override
