@@ -102,13 +102,20 @@ public class HttpClientUtil {
                     String result = EntityUtils.toString(response.getEntity());
                     return result;
                 } else {
-                    SpiderBase.logToFile("error", url + ", code: " + statusCode);
+                    SpiderBase.logToFile("errorhttpclient", url + ", code: " + statusCode);
+                    if (503 == statusCode) {
+                        httpClientPool.remove(httpClient);
+                        SpiderBase.logToFile("errorhttpclient", "removed current httpclient, client pool size: " + httpClientPool.size());
+                    }
                 }
             } finally {
                 response.close();
             }
         } catch (Exception e) {
             e.printStackTrace();
+            SpiderBase.logToFile("errorhttpclient", url + ", message: " + e.getMessage());
+            httpClientPool.remove(httpClient);
+            SpiderBase.logToFile("errorhttpclient", "removed current httpclient, client pool size: " + httpClientPool.size());
         } finally {
             // httpclient.close();  HttpClient池中的客户端需要复用，请勿关闭
         }
