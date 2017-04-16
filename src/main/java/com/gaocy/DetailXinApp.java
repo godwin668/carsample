@@ -24,9 +24,10 @@ public class DetailXinApp extends DetailBaseApp {
 
     public static void main(String[] args) {
         // shop2CarDetail();
-        String dateStr = "20170407";
+        String dateStr = "20170415";
         SpiderEnum spiderEnum = SpiderEnum.youxin;
-        String[] cityArr = CityUtil.getAllCityNameBySpider(spiderEnum).toArray(new String[] {});
+        // String[] cityArr = CityUtil.getAllCityNameBySpider(spiderEnum).toArray(new String[] {});
+        String[] cityArr = { "北京", "上海", "苏州", "杭州", "宁波" };
         for (String city : cityArr) {
             Spider spider = SpiderFactory.getSpider(spiderEnum, new String[] { city });
             String spiderName = spider.getClass().getSimpleName().toLowerCase().replaceAll("spider", "");
