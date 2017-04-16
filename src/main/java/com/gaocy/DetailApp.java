@@ -34,7 +34,7 @@ public class DetailApp extends DetailBaseApp implements Callable {
     }
 
     public static void main(String[] args) {
-        String dateStr = "20170415";
+        String dateStr = "20170416";
         SpiderEnum[] spiderEnumArr = { SpiderEnum.che168, SpiderEnum.youxin };
         String[] cityArr = new String[] { "北京", "长沙", "重庆", "石家庄", "天津" };
         for (SpiderEnum spider : spiderEnumArr) {
