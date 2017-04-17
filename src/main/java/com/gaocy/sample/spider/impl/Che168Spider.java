@@ -295,7 +295,8 @@ public class Che168Spider extends SpiderBase implements Spider {
 
             // 商铺信息
             String url = "http://www.che168.com/Handler/GetOtherInfo.ashx?DealerId=" + shopId;
-            if ("商家".equals(identity) && StringUtils.isNotBlank(shopId)) {
+            boolean isGrabDealerInfo = false;
+            if (isGrabDealerInfo && "商家".equals(identity) && StringUtils.isNotBlank(shopId)) {
                 Map shopInfoMap = JSON.parseObject(SpiderBase.getDoc(url).text(), HashMap.class);
                 carDetailVo.setShopInfo(shopInfoMap);
             }
