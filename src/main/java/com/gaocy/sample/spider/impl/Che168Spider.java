@@ -104,7 +104,8 @@ public class Che168Spider extends SpiderBase implements Spider {
 
             String carAddressStr = detailDoc.select(".car-address").text().replaceAll("&nbsp;", "").trim();
             carAddressStr = removeWhiteSpace(carAddressStr);
-            String carAddressRegex = "看车地点:(.*?)联系人:(.*?)发布时间:(.*)";
+            String carAddressRegexDealer = "看车地点:(.*?)联系人:(.*?)发布时间:(.*)";
+            String carAddressRegexPersonal = "看车地点:(.*?)发布时间:(.*)";
 
             // 平台来源 src
             carDetailVo.setSrc(SpiderEnum.che168.name());
@@ -145,6 +146,15 @@ public class Che168Spider extends SpiderBase implements Spider {
             String modelName = breadNavDoc.get(breadNavDoc.size() - 1).text().replace("二手车", "").replace("二手", "");                             // 车型名称
             carDetailVo.setModelName(modelName);
 
+            // 身份类型 identity
+            String identity = "";
+            if (detailUrl.contains("dealer")) {
+                identity = "商家";
+            } else if (detailUrl.contains("personal")) {
+                identity = "个人";
+            }
+            carDetailVo.setIdentity(identity);
+
             // 车辆颜色 color
             String color = detailDoc.select("#anchor02 .infotext-list li").get(3).text().replaceFirst(".*?：(.*)", "$1");
             carDetailVo.setColor(removeWhiteSpace(color));
@@ -166,16 +176,29 @@ public class Che168Spider extends SpiderBase implements Spider {
             carDetailVo.setPrice(carVo.getPrice());
 
             // 发布时间 postDate
-            String postDate = carAddressStr.replaceFirst(carAddressRegex, "$3").replaceAll("-", "").trim();
-            carDetailVo.setPostDate(postDate);
+            if ("商家".equals(identity)) {
+                String postDate = carAddressStr.replaceFirst(carAddressRegexDealer, "$3").replaceAll("-", "").trim();
+                carDetailVo.setPostDate(postDate);
+            } else if ("个人".equals(identity)) {
+                String postDate = carAddressStr.replaceFirst(carAddressRegexPersonal, "$2").replaceAll("-", "").trim();
+                carDetailVo.setPostDate(postDate);
+            }
 
             // 上牌时间 regDate
             String regDate = detailsElements.get(1).text().replaceAll("-", "").replaceFirst("(\\d+).*", "$1");
             carDetailVo.setRegDate(regDate);
 
             // 联系人 contact
-            String userName = carAddressStr.replaceFirst(carAddressRegex, "$2").trim().replaceAll("&nbsp;", "");
-            carDetailVo.setUserName(userName);
+            if ("商家".equals(identity)) {
+                String userName = carAddressStr.replaceFirst(carAddressRegexDealer, "$2").trim().replaceAll("&nbsp;", "");
+                carDetailVo.setUserName(userName);
+            } else if ("个人".equals(identity)) {
+                String userName = detailDoc.select(".user-info .user-title").get(0).text();
+                if (userName.contains("|")) {
+                    userName = userName.substring(userName.indexOf("|") + 1);
+                }
+                carDetailVo.setUserName(userName);
+            }
 
             // 联系电话 phone
             try {
@@ -186,8 +209,13 @@ public class Che168Spider extends SpiderBase implements Spider {
             }
 
             // 看车地址 address
-            String address = carAddressStr.replaceFirst(carAddressRegex, "$1").trim();
-            carDetailVo.setAddress(address);
+            if ("商家".equals(identity)) {
+                String address = carAddressStr.replaceFirst(carAddressRegexDealer, "$1").trim();
+                carDetailVo.setAddress(address);
+            } else if ("个人".equals(identity)) {
+                String address = carAddressStr.replaceFirst(carAddressRegexPersonal, "$1").trim();
+                carDetailVo.setAddress(address);
+            }
 
             // 图片 images
             Elements imageElements = detailDoc.select(".fc-piclist ul li img");
@@ -200,15 +228,6 @@ public class Che168Spider extends SpiderBase implements Spider {
                 carDetailVo.setImages(imageUrlList);
             }
 
-            // 身份类型 identity
-            String identity = "";
-            if (detailUrl.contains("dealer")) {
-                identity = "商家";
-            } else if (detailUrl.contains("personal")) {
-                identity = "个人";
-            }
-            carDetailVo.setIdentity(identity);
-
             // 商家名称 shopName
             try {
                 if ("商家".equals(identity)) {
@@ -220,9 +239,12 @@ public class Che168Spider extends SpiderBase implements Spider {
                 e.printStackTrace();
             }
 
-            // 商家id bizId
-            String shopId = detailUrl.replaceFirst(".*?dealer/(\\d+).*", "$1");
-            carDetailVo.setShopId(shopId);
+            // 商家id shopId
+            String shopId = "";
+            if ("商家".equals(identity)) {
+                shopId = detailUrl.replaceFirst(".*?dealer/(\\d+).*", "$1");
+                carDetailVo.setShopId(shopId);
+            }
 
             // 帖子状态 status
             // TODO
