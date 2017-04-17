@@ -87,7 +87,7 @@ public class HttpClientUtil {
                     SpiderBase.logToFile("httpclienttimer", "[" + dfDateTime.format(new Date()) + "] Timer run Exception: " + e.getMessage());
                 }
             }
-        }, 0, 18000);
+        }, 0, 30000);
     }
 
     public static void main(String args[]) {
