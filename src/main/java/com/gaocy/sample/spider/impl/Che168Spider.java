@@ -106,8 +106,6 @@ public class Che168Spider extends SpiderBase implements Spider {
             carAddressStr = removeWhiteSpace(carAddressStr);
             String carAddressRegex = "看车地点:(.*?)联系人:(.*?)发布时间:(.*)";
 
-            Element merchantsTitleElement = detailDoc.select(".merchants-info .merchants-title").get(0);
-
             // 平台来源 src
             carDetailVo.setSrc(SpiderEnum.che168.name());
 
@@ -203,7 +201,7 @@ public class Che168Spider extends SpiderBase implements Spider {
             }
 
             // 身份类型 identity
-            String identity = merchantsTitleElement.select(".name").text();
+            String identity = "";
             if (detailUrl.contains("dealer")) {
                 identity = "商家";
             } else if (detailUrl.contains("personal")) {
@@ -212,9 +210,15 @@ public class Che168Spider extends SpiderBase implements Spider {
             carDetailVo.setIdentity(identity);
 
             // 商家名称 shopName
-            String shopName = merchantsTitleElement.html().replaceAll("\n", "").replaceFirst ("(?s)(?i).*?\\|</i>([^<]+).*", "$1");
-            shopName = removeWhiteSpace(shopName);
-            carDetailVo.setShopName(shopName);
+            try {
+                if ("商家".equals(identity)) {
+                    String shopName = detailDoc.select(".merchants-info .merchants-title").get(0).html().replaceAll("\n", "").replaceFirst ("(?s)(?i).*?\\|</i>([^<]+).*", "$1");
+                    shopName = removeWhiteSpace(shopName);
+                    carDetailVo.setShopName(shopName);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
             // 商家id bizId
             String shopId = detailUrl.replaceFirst(".*?dealer/(\\d+).*", "$1");
