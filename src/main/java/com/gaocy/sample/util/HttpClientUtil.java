@@ -203,7 +203,7 @@ public class HttpClientUtil {
         } finally {
             // httpclient.close();  HttpClient池中的客户端需要复用，请勿关闭
         }
-        return "";
+        return get(url);
     }
 
     /**

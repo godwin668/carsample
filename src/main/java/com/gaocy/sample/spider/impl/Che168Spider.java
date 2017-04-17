@@ -204,16 +204,21 @@ public class Che168Spider extends SpiderBase implements Spider {
 
             // 身份类型 identity
             String identity = merchantsTitleElement.select(".name").text();
+            if (detailUrl.contains("dealer")) {
+                identity = "商家";
+            } else if (detailUrl.contains("personal")) {
+                identity = "个人";
+            }
             carDetailVo.setIdentity(identity);
 
-            // 商家名称 bizName
-            String bizName = merchantsTitleElement.html().replaceAll("\n", "").replaceFirst ("(?s)(?i).*?\\|</i>([^<]+).*", "$1");
-            bizName = removeWhiteSpace(bizName);
-            carDetailVo.setShopName(bizName);
+            // 商家名称 shopName
+            String shopName = merchantsTitleElement.html().replaceAll("\n", "").replaceFirst ("(?s)(?i).*?\\|</i>([^<]+).*", "$1");
+            shopName = removeWhiteSpace(shopName);
+            carDetailVo.setShopName(shopName);
 
             // 商家id bizId
-            String bizId = detailUrl.replaceFirst(".*?dealer/(\\d+).*", "$1");
-            carDetailVo.setShopId(bizId);
+            String shopId = detailUrl.replaceFirst(".*?dealer/(\\d+).*", "$1");
+            carDetailVo.setShopId(shopId);
 
             // 帖子状态 status
             // TODO
@@ -261,6 +266,13 @@ public class Che168Spider extends SpiderBase implements Spider {
                 }
             }
             carDetailVo.setParams(paramMap);
+
+            // 商铺信息
+            String url = "http://www.che168.com/Handler/GetOtherInfo.ashx?DealerId=" + shopId;
+            if ("商家".equals(identity) && StringUtils.isNotBlank(shopId)) {
+                Map shopInfoMap = JSON.parseObject(SpiderBase.getDoc(url).text(), HashMap.class);
+                carDetailVo.setShopInfo(shopInfoMap);
+            }
         } catch (Exception e) {
             logToFile("error", "[CAR VO] " + JSON.toJSONString(carVo));
         }

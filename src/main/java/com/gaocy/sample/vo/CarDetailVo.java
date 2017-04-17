@@ -36,7 +36,8 @@ public class CarDetailVo {
     // 商家名称 shopName
     // 商家id shopId
     // 帖子状态 status
-    // 帖子标签 tag
+    // 帖子标签 tags
+    // 其他参数 params
 
     // 平台来源
     private String src;
@@ -112,6 +113,9 @@ public class CarDetailVo {
 
     // 商家id
     private String shopId;
+
+    // 商家信息
+    private Map<String, Object> shopInfo;
 
     // 商家名称
     private String shopName;
@@ -332,6 +336,14 @@ public class CarDetailVo {
 
     public void setShopId(String shopId) {
         this.shopId = shopId;
+    }
+
+    public Map<String, Object> getShopInfo() {
+        return shopInfo;
+    }
+
+    public void setShopInfo(Map<String, Object> shopInfo) {
+        this.shopInfo = shopInfo;
     }
 
     public String getStatus() {
