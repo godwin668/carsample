@@ -184,7 +184,7 @@ public class HttpClientUtil {
                 int statusCode = response.getStatusLine().getStatusCode();
                 long endTime = System.currentTimeMillis();
                 logger.debug("[HttpClient] END get url(" + url + ") elapse: " + ((endTime - startTime) / 1000) + " s, result code: " + statusCode);
-                if (statusCode >= 200 && statusCode < 300) {
+                if (statusCode >= 200 && statusCode < 500) {
                     String result = EntityUtils.toString(response.getEntity());
                     return result;
                 } else {
