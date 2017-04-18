@@ -279,13 +279,15 @@ public class Che168Spider extends SpiderBase implements Spider {
             }
 
             Map<String, String> paramMap = new HashMap<String, String>();
-            Elements basicInfoElements = detailDoc.select("#anchor01 ul li.grid-6");
+            Elements basicInfoElements = detailDoc.select("#anchor01 ul li");
             if (null != basicInfoElements && basicInfoElements.size() > 0) {
                 for (Element basicInfoElement : basicInfoElements) {
                     try {
                         String key = basicInfoElement.text().replaceFirst("(.*?)：(.*)", "$1");
                         String value = basicInfoElement.text().replaceFirst("(.*?)：(.*)", "$2");
-                        paramMap.put(removeWhiteSpace(key), removeWhiteSpace(value));
+                        if (null != value && value.length() < 30) {
+                            paramMap.put(removeWhiteSpace(key), removeWhiteSpace(value));
+                        }
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
