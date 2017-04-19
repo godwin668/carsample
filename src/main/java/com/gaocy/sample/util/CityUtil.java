@@ -11,10 +11,10 @@ import java.util.*;
 public class CityUtil {
 
     // 中文名称-pinyin
-    private static Map<String, String> cityName2PinyinMap = new HashMap<String, String>();
+    private static Map<String, String> cityName2PinyinMap = new LinkedHashMap<String, String>();
 
     // pinyin-中文名称
-    private static Map<String, String> cityPinyin2NameMap = new HashMap<String, String>();
+    private static Map<String, String> cityPinyin2NameMap = new LinkedHashMap<String, String>();
 
     // 城市中文名称-城市英文名称
     private static Map<SpiderEnum, Map<String, String>> spiderCityZH2ENMap = new HashMap<SpiderEnum, Map<String, String>>();
@@ -23,11 +23,11 @@ public class CityUtil {
     private static Map<SpiderEnum, Map<String, String>> spiderCityEN2ZHMap = new HashMap<SpiderEnum, Map<String, String>>();
 
     static {
-        Set<String> cityNameSet = new HashSet<String>();
+        Set<String> cityNameSet = new LinkedHashSet<String>();
         for (SpiderEnum spider : SpiderEnum.values()) {
-            Map<String, String> cityZH2ENMap = new HashMap<String, String>();
+            Map<String, String> cityZH2ENMap = new LinkedHashMap<String, String>();
             spiderCityZH2ENMap.put(spider, cityZH2ENMap);
-            Map<String, String> cityEN2ZHMap = new HashMap<String, String>();
+            Map<String, String> cityEN2ZHMap = new LinkedHashMap<String, String>();
             spiderCityEN2ZHMap.put(spider, cityEN2ZHMap);
             Configuration cityConf = ConfUtil.getConfByName("city/" + spider.name() + ".properties");
             Iterator<String> cityKeys = cityConf.getKeys();
