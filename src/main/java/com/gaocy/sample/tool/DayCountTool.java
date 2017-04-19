@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.gaocy.sample.spider.Spider;
 import com.gaocy.sample.spider.SpiderBase;
 import com.gaocy.sample.spider.SpiderEnum;
+import com.gaocy.sample.util.CityUtil;
 import com.gaocy.sample.util.ConfUtil;
 import com.gaocy.sample.vo.CarVo;
 import org.apache.commons.collections.CollectionUtils;
@@ -26,11 +27,14 @@ public class DayCountTool {
 
     public static void main(String[] args) {
         try {
-            Date startDate = dfDate.parse("20170322");
-            Date endDate = dfDate.parse("20170405");
+            Date startDate = dfDate.parse("20170416");
+            Date endDate = dfDate.parse("20170419");
 
             String[] srcArr = ConfUtil.getString("init.src.list").split(",");
             String[] cityArr = ConfUtil.getString("init.city.list").split(",");
+            if (null == cityArr || cityArr.length < 2) {
+                cityArr = CityUtil.getAllCityName().toArray(new String[] {});
+            }
             List<Spider> spiderList = new ArrayList<Spider>();
             for (String src : srcArr) { // 来源
                 SpiderEnum spider = SpiderEnum.valueOf(src);
@@ -40,15 +44,9 @@ public class DayCountTool {
                 SpiderBase.logToFile("diff", "-----------------------------");
                 for (String city : cityArr) {
                     for (Date curDate = startDate; curDate.before(endDate); curDate = DateUtils.addDays(curDate, 1)) {  // 日期
-                        Collection[] oldCommonNewColl = getOldCommonNewColl(spider, city, dfDate.format(curDate));
-                        String info = dfDate.format(curDate) + "\t" + spider.name() + "\t" + city + "\t" + oldCommonNewColl[0].size() + "\t" + oldCommonNewColl[1].size() + "\t" + oldCommonNewColl[2].size();
-                        String infoIds = "\n\n------------------------------------------------\n" +
-                                dfDate.format(curDate) + "\t" + spider.name() + "\t" + city + "\n" +
-                                "--> 下架共" + oldCommonNewColl[0].size() + "条：\n" + JSON.toJSONString(oldCommonNewColl[0]) + "\n" +
-                                "--> 不变共" + oldCommonNewColl[1].size() + "条：\n" + JSON.toJSONString(oldCommonNewColl[1]) + "\n" +
-                                "--> 新增共" + oldCommonNewColl[2].size() + "条：\n" + JSON.toJSONString(oldCommonNewColl[2]);
+                        int[] oldCommonNewColl = getOldCommonNewCount(spider, city, dfDate.format(curDate));
+                        String info = dfDate.format(curDate) + "\t" + spider.name() + "\t" + city + "\t" + oldCommonNewColl[0] + "\t" + oldCommonNewColl[1] + "\t" + oldCommonNewColl[2];
                         SpiderBase.logToFile("diff", info);
-                        SpiderBase.logToFile("diffids", infoIds);
                     }
                 }
             }
