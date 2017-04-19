@@ -65,11 +65,10 @@ public class HttpClientUtil {
                         Map.Entry<Integer, Integer> entry = it.next();
                         Integer key = entry.getKey();
                         Integer value = entry.getValue();
-                        if (null != key && null != value && value > 5) {
+                        if (null != key && null != value && value > 0) {
                             String content = get("https://www.baidu.com/", key);
                             if (null != content && content.contains("百度一下")) {
                                 logger.info("[HttpClient Back to Normal] HttpClient pool index " + key + " error count " + value + " recovered.");
-                                SpiderBase.logToFile("httpclientrecover", "[HttpClient NORMAL] client pool index " + key + " error count " + value + " back to OK");
                                 SpiderBase.logToFile("httpclienttimer", "[HttpClient NORMAL] client pool index " + key + " error count " + value + " back to OK");
                                 it.remove();
                             } else {
