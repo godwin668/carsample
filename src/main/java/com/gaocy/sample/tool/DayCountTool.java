@@ -103,6 +103,14 @@ public class DayCountTool {
         return diffCount;
     }
 
+    /**
+     * 获取全部ID集合
+     *
+     * @param spider
+     * @param city
+     * @param dateStr
+     * @return
+     */
     public static Set<String> getIdSet(SpiderEnum spider, String city, String dateStr) {
         Set<String> todayIdSet = new HashSet<String>();
         File todayFile = new File(baseDir, dateStr + "/" + spider.name().toLowerCase() + ".txt");

@@ -1,4 +1,10 @@
-package com.gaocy;
+package com.gaocy.test;
+
+import com.alibaba.fastjson.JSON;
+import com.gaocy.sample.spider.Spider;
+import com.gaocy.sample.spider.impl.Che168Spider;
+import com.gaocy.sample.vo.CarDetailVo;
+import com.gaocy.sample.vo.CarVo;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -12,38 +18,11 @@ import java.io.IOException;
 public class Test {
 
     public static void main(String[] args) {
-        int p = -16777216;
-        System.out.println(Integer.toBinaryString(p));
-
-
-        BufferedImage img = null;
-        try {
-            img = ImageIO.read(new File("/Users/Godwin/car/1.jpg"));
-
-            int[][] colorMatrix = convertTo2DWithoutUsingGetRGB(img);
-            for (int i = 0; i < colorMatrix.length; i ++) {
-                System.out.println();
-                for (int j = 0; j < colorMatrix[i].length; j++) {
-                    System.out.print(Integer.toBinaryString(colorMatrix[i][j]) + " ");
-                }
-            }
-
-
-            /*
-            int width = img.getWidth();
-            int height = img.getHeight();
-            for (int i = 1; i < width; i++) {
-                for (int j = 1; j < height; j++) {
-                    byte[] pixels = ((DataBufferByte) img.getRaster().getDataBuffer()).getData();
-                    // int rgb = img.getRGB(i, j);
-                    System.out.println("(" + i + ", " + j + "), " + JSON.toJSONString(pixels));
-                }
-            }
-            */
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Spider spider = new Che168Spider(null);
+        CarVo carVo = new CarVo();
+        carVo.setAddress("/dealer/75451/10228126.html?pvareaid=100519");
+        CarDetailVo carDetailVo = spider.getByUrl(carVo);
+        System.out.println(JSON.toJSONString(carDetailVo));
     }
 
     private static int[][] convertTo2DWithoutUsingGetRGB(BufferedImage image) {
