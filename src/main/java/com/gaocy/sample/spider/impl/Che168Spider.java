@@ -23,7 +23,8 @@ public class Che168Spider extends SpiderBase implements Spider {
     // private static String URL_LIST_TEMPLATE = "http://www.che168.com/<city>/a0_0msdgscncgpi1ltocsp<page>exx0/";
 
     private static String URL_BASE = "http://www.che168.com";
-    private static String URL_LIST_TEMPLATE = URL_BASE + "/<city>/a0_0msdgscncgpi1ltocsp<page>exb104y96x0/";   // 20170405
+    // private static String URL_LIST_TEMPLATE = URL_BASE + "/<city>/a0_0msdgscncgpi1ltocsp<page>exb104y96x0/";   // 20170405
+    private static String URL_LIST_TEMPLATE = URL_BASE + "/<city>/<price>/a0_0msdgscncgpi1ltocsp<page>exx0/";   // 20170421
 
     public Che168Spider(String[] cityArr) {
         super(cityArr);
@@ -43,47 +44,51 @@ public class Che168Spider extends SpiderBase implements Spider {
             return infoList;
         }
         String url = URL_LIST_TEMPLATE.replaceFirst("<city>", cityEName);
-        int pageCount = getPageCount(url);
-        String mileageTimeCityRegex = "(.*?)万公里／(.*?)／(.*)";
-        for (int i = 1; i <= pageCount; i++) {
-            String listUrl = url.replaceFirst("<page>", "" + i);
-            Document doc = getDoc(listUrl);
-            if (null == doc) {
-                SenderUtil.sendMessage(SenderUtil.MessageLevel.ERROR, "listByCity doc: " + listUrl);
-                continue;
-            }
-            Elements infoElements = doc.select(".tab-content .list-photo ul li");
-            if (null == infoElements || infoElements.size() < 1) {
-                SenderUtil.sendMessage(SenderUtil.MessageLevel.ERROR, "listByCity: " + listUrl);
-            }
-            for (Element infoElement : infoElements) {
-                try {
-                    String infoName = infoElement.select(".list-photo-info h3").get(0).text();
-                    String infoHref = infoElement.select("a").get(0).attr("href");
-                    String mileageTimeCityStr = infoElement.select(".list-photo-info .time").get(0).text();   // 2万公里／2015-12／北京
-                    String infoCity = mileageTimeCityStr.replaceFirst(mileageTimeCityRegex, "$3");
-                    if (!cityName.equals(infoCity)) {
-                        continue;
-                    }
-                    String infoId = infoHref.replaceFirst(".*?/(\\d+).html.*", "$1");
-                    String infoRegDate = mileageTimeCityStr.replaceFirst(mileageTimeCityRegex, "$2").replaceAll("-", "");
-                    String infoMileage = mileageTimeCityStr.replaceFirst(mileageTimeCityRegex, "$1");
-                    String infoPrice = infoElement.select(".list-photo-info .price em b").get(0).text();
+        String[] priceUriSubArr = { "0_3", "3_5", "5_8", "8_10", "10_15", "15_20", "20_30", "30_50", "50_0" };  // 价格
+        for (String priceUriSub : priceUriSubArr) {
+            String priceUrl = url.replaceFirst("<price>", priceUriSub);
+            int pageCount = getPageCount(priceUrl);
+            String mileageTimeCityRegex = "(.*?)万公里／(.*?)／(.*)";
+            for (int i = 1; i <= pageCount; i++) {
+                String listUrl = priceUrl.replaceFirst("<page>", "" + i);
+                Document doc = getDoc(listUrl);
+                if (null == doc) {
+                    SenderUtil.sendMessage(SenderUtil.MessageLevel.ERROR, "listByCity doc: " + listUrl);
+                    continue;
+                }
+                Elements infoElements = doc.select(".tab-content .list-photo ul li");
+                if (null == infoElements || infoElements.size() < 1) {
+                    SenderUtil.sendMessage(SenderUtil.MessageLevel.ERROR, "listByCity: " + listUrl);
+                }
+                for (Element infoElement : infoElements) {
+                    try {
+                        String infoName = infoElement.select(".list-photo-info h3").get(0).text();
+                        String infoHref = infoElement.select("a").get(0).attr("href");
+                        String mileageTimeCityStr = infoElement.select(".list-photo-info .time").get(0).text();   // 2万公里／2015-12／北京
+                        String infoCity = mileageTimeCityStr.replaceFirst(mileageTimeCityRegex, "$3");
+                        if (!cityName.equals(infoCity)) {
+                            continue;
+                        }
+                        String infoId = infoHref.replaceFirst(".*?/(\\d+).html.*", "$1");
+                        String infoRegDate = mileageTimeCityStr.replaceFirst(mileageTimeCityRegex, "$2").replaceAll("-", "");
+                        String infoMileage = mileageTimeCityStr.replaceFirst(mileageTimeCityRegex, "$1");
+                        String infoPrice = infoElement.select(".list-photo-info .price em b").get(0).text();
 
-                    CarVo vo = new CarVo();
-                    vo.setSrc(SpiderEnum.che168);
-                    vo.setCity(infoCity);
-                    vo.setSrcId(infoId);
-                    vo.setName(infoName);
-                    vo.setRegDate(infoRegDate);
-                    vo.setMileage(infoMileage);
-                    vo.setPrice(infoPrice);
-                    vo.setAddress(infoHref);
-                    infoList.add(vo);
-                    logToFile(dfDate.format(new Date()) + "/" + vo.getSrc().name().toLowerCase(), JSON.toJSONString(vo));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    logToFile("error", e.toString());
+                        CarVo vo = new CarVo();
+                        vo.setSrc(SpiderEnum.che168);
+                        vo.setCity(infoCity);
+                        vo.setSrcId(infoId);
+                        vo.setName(infoName);
+                        vo.setRegDate(infoRegDate);
+                        vo.setMileage(infoMileage);
+                        vo.setPrice(infoPrice);
+                        vo.setAddress(infoHref);
+                        infoList.add(vo);
+                        logToFile(dfDate.format(new Date()) + "/" + vo.getSrc().name().toLowerCase(), JSON.toJSONString(vo));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        logToFile("error", e.toString());
+                    }
                 }
             }
         }

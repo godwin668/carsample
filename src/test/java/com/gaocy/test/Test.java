@@ -11,6 +11,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Created by godwin on 2017/3/19.
@@ -19,10 +20,10 @@ public class Test {
 
     public static void main(String[] args) {
         Spider spider = new Che168Spider(null);
-        CarVo carVo = new CarVo();
-        carVo.setAddress("/dealer/134677/19201338.html?pvareaid=100519");
-        CarDetailVo carDetailVo = spider.getByUrl(carVo);
-        System.out.println(JSON.toJSONString(carDetailVo));
+        List<CarVo> carVoList = spider.listByCityName("北京");
+        for (CarVo carVo : carVoList) {
+            System.out.println(JSON.toJSONString(carVo));
+        }
     }
 
     private static int[][] convertTo2DWithoutUsingGetRGB(BufferedImage image) {
