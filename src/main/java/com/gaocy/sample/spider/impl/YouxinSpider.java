@@ -41,6 +41,7 @@ public class YouxinSpider extends SpiderBase implements Spider {
         if (StringUtils.isBlank(cityEName)) {
             return infoList;
         }
+        Set<String> idSet = new HashSet<String>();
         String url = URL_LIST_TEMPLATE.replaceFirst("<city>", cityEName);
         String[] mileageUriSubArr = {"sn_k0-1", "sn_k1-3", "sn_k3-6", "sn_k6-10", "sn_k10-20", "sn_k20-"};  // 里程
         String regDateAndMileageRegex = "上牌(.*?)｜里程(.*?)万公里";
@@ -92,8 +93,10 @@ public class YouxinSpider extends SpiderBase implements Spider {
                             vo.setMileage(infoMileage);
                             vo.setPrice(infoPrice);
                             vo.setAddress(infoHref);
-                            infoList.add(vo);
-                            logToFile(dfDate.format(new Date()) + "/" + vo.getSrc().name().toLowerCase(), JSON.toJSONString(vo));
+                            if (!idSet.contains(infoId)) {
+                                infoList.add(vo);
+                                logToFile(dfDate.format(new Date()) + "/" + vo.getSrc().name().toLowerCase(), JSON.toJSONString(vo));
+                            }
                         } catch (Exception e) {
                             e.printStackTrace();
                             logToFile("error", e.toString());

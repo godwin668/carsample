@@ -43,6 +43,7 @@ public class Che168Spider extends SpiderBase implements Spider {
         if (StringUtils.isBlank(cityEName)) {
             return infoList;
         }
+        Set<String> idSet = new HashSet<String>();
         String url = URL_LIST_TEMPLATE.replaceFirst("<city>", cityEName);
         String[] priceUriSubArr = { "0_3", "3_5", "5_8", "8_10", "10_15", "15_20", "20_30", "30_50", "50_0" };  // 价格
         for (String priceUriSub : priceUriSubArr) {
@@ -83,8 +84,10 @@ public class Che168Spider extends SpiderBase implements Spider {
                         vo.setMileage(infoMileage);
                         vo.setPrice(infoPrice);
                         vo.setAddress(infoHref);
-                        infoList.add(vo);
-                        logToFile(dfDate.format(new Date()) + "/" + vo.getSrc().name().toLowerCase(), JSON.toJSONString(vo));
+                        if (!idSet.contains(infoId)) {
+                            infoList.add(vo);
+                            logToFile(dfDate.format(new Date()) + "/" + vo.getSrc().name().toLowerCase(), JSON.toJSONString(vo));
+                        }
                     } catch (Exception e) {
                         e.printStackTrace();
                         logToFile("error", e.toString());

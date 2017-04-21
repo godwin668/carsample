@@ -12,9 +12,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by godwin on 2017-03-16.
@@ -40,6 +38,7 @@ public class GuaziSpider extends SpiderBase implements Spider {
         if (StringUtils.isBlank(cityEName)) {
             return infoList;
         }
+        Set<String> idSet = new HashSet<String>();
         String url = URL_LIST_TEMPLATE.replaceFirst("<city>", cityEName);
         int pageCount = getPageCount(url);
         boolean isOtherCity = false;
@@ -89,8 +88,10 @@ public class GuaziSpider extends SpiderBase implements Spider {
                     vo.setMileage(infoMileage);
                     vo.setPrice(infoPrice);
                     vo.setAddress(infoHref);
-                    infoList.add(vo);
-                    logToFile(dfDate.format(new Date()) + "/" + vo.getSrc().name().toLowerCase(), JSON.toJSONString(vo));
+                    if (!idSet.contains(infoId)) {
+                        infoList.add(vo);
+                        logToFile(dfDate.format(new Date()) + "/" + vo.getSrc().name().toLowerCase(), JSON.toJSONString(vo));
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                     logToFile("error", e.toString());
