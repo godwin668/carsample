@@ -58,7 +58,10 @@ public class HttpClientUtil {
             @Override
             public void run() {
                 try {
-                    logger.info("[HttpClient Timer] running...");
+                    if (httpClientIndexErrorCountMap.size() <= 1) {
+                        return;
+                    }
+                    logger.debug("[HttpClient Timer] Start check httpClientIndexErrorCountMap(" + JSON.toJSONString(httpClientIndexErrorCountMap) + ")");
                     SpiderBase.logToFile("httpclienttimer", "[" + dfDateTime.format(new Date()) + "] Start check httpClientIndexErrorCountMap(" + JSON.toJSONString(httpClientIndexErrorCountMap) + ")");
                     int curErrorClientSize = 0;
                     for(Iterator<Map.Entry<Integer, Integer>> it = httpClientIndexErrorCountMap.entrySet().iterator(); it.hasNext(); ) {
@@ -144,7 +147,7 @@ public class HttpClientUtil {
                 try {
                     SpiderBase.logToFile("httpclienterror", "[HttpClient POOL NOT sufficient] valid client percent: " + validClientSize + "/" + httpClientPool.size() + ", reset all...");
                     httpClientIndexErrorCountMap.clear();
-                    Thread.sleep(3000);
+                    Thread.sleep(2000);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
