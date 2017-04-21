@@ -69,7 +69,7 @@ public class HttpClientUtil {
                             String content = get("https://www.baidu.com/", key);
                             if (null != content && content.contains("百度一下")) {
                                 logger.info("[HttpClient Back to Normal] HttpClient pool index " + key + " error count " + value + " recovered.");
-                                SpiderBase.logToFile("httpclienttimer", "[HttpClient NORMAL] client pool index " + key + " error count " + value + " back to OK");
+                                SpiderBase.logToFile("httpclienttimer", "[" + dfDateTime.format(new Date()) + "] [HttpClient NORMAL] client pool index " + key + " error count " + value + " back to OK");
                                 it.remove();
                             } else {
                                 ++curErrorClientSize;
@@ -86,7 +86,7 @@ public class HttpClientUtil {
                     SpiderBase.logToFile("httpclienttimer", "[" + dfDateTime.format(new Date()) + "] Timer run Exception: " + e.getMessage());
                 }
             }
-        }, 0, 30000);
+        }, 0, 10000);
     }
 
     public static void main(String args[]) {
@@ -129,13 +129,13 @@ public class HttpClientUtil {
             e.printStackTrace();
         }
         Integer errorCount = httpClientIndexErrorCountMap.get(curIndex);
-        if (null != errorCount && errorCount > 5) {
+        if (null != errorCount && errorCount > 1) {
             logger.warn("[HttpClient NOT available] client pool index " + curIndex + " error count " + errorCount);
             SpiderBase.logToFile("httpclienterror", "[HttpClient NOT available] client pool index " + curIndex + " error count " + errorCount);
             int errorMapOverValveCount = 0;
             Collection<Integer> errorValues = httpClientIndexErrorCountMap.values();
             for (Integer errValue : errorValues) {
-                if (null != errorCount && errorCount > 5) {
+                if (null != errorCount && errorCount > 1) {
                     ++errorMapOverValveCount;
                 }
             }
