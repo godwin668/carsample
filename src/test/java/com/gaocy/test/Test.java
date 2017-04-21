@@ -20,7 +20,7 @@ public class Test {
     public static void main(String[] args) {
         Spider spider = new Che168Spider(null);
         CarVo carVo = new CarVo();
-        carVo.setAddress("/dealer/75451/10228126.html?pvareaid=100519");
+        carVo.setAddress("/dealer/134677/19201338.html?pvareaid=100519");
         CarDetailVo carDetailVo = spider.getByUrl(carVo);
         System.out.println(JSON.toJSONString(carDetailVo));
     }

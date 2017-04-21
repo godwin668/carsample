@@ -132,7 +132,7 @@ public class Che168Spider extends SpiderBase implements Spider {
 
             // 车系ID seriesId
             String seriesId = detailDoc.select("#car_seriesid").attr("value");                             // 车系ID
-            carDetailVo.setBrandId(seriesId);
+            carDetailVo.setSeriesId(seriesId);
 
             // 车系名称 seriesName
             String seriesName = breadNavDoc.get(breadNavDoc.size() - 2).text().replace("二手车", "").replace("二手", "");                            // 车系名称
