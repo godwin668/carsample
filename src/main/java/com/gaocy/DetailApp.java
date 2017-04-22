@@ -57,7 +57,7 @@ public class DetailApp extends DetailBaseApp implements Callable {
             for (CarVo carVo : carVoList) {
                 CarDetailVo carDetailVo = spider.getByUrl(carVo);
                 if (null != carDetailVo && StringUtils.isNoneBlank(carDetailVo.getId())) {
-                    SpiderBase.logToFile("cardetail/" + spiderName + "/" + city, JSON.toJSONString(carDetailVo));
+                    SpiderBase.logToFile(dfDate.format(new Date()) + "/detail/" + spiderName + "/" + city, JSON.toJSONString(carDetailVo));
                 }
             }
             SpiderBase.logToFile("logs/" + dfDate.format(new Date()) + "_" + spiderName, "[CARDETAIL] [" + dfDateTime.format(new Date()) + "] END processing " + spiderName + " " + city + ", info size: " + carVoList.size());

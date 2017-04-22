@@ -11,10 +11,22 @@ import java.util.*;
 public class CityUtil {
 
     // 中文名称-pinyin
-    private static Map<String, String> cityName2PinyinMap = new LinkedHashMap<String, String>();
+    private static Map<String, String> cityName2PinyinMap = new TreeMap<String, String>(new Comparator<String>() {
+        @Override
+        public int compare(String o1, String o2) {
+            String py1 = PinyinUtil.getPinYin(o1);
+            String py2 = PinyinUtil.getPinYin(o2);
+            return py1.compareTo(py2);
+        }
+    });
 
     // pinyin-中文名称
-    private static Map<String, String> cityPinyin2NameMap = new LinkedHashMap<String, String>();
+    private static Map<String, String> cityPinyin2NameMap = new TreeMap<String, String>(new Comparator<String>() {
+        @Override
+        public int compare(String o1, String o2) {
+            return o1.compareTo(o2);
+        }
+    });
 
     // 城市中文名称-城市英文名称
     private static Map<SpiderEnum, Map<String, String>> spiderCityZH2ENMap = new HashMap<SpiderEnum, Map<String, String>>();
@@ -102,5 +114,26 @@ public class CityUtil {
 
         System.out.println("名称-pinyin: 北京_" + getPinyinByName("北京"));
         System.out.println("pinyin-名称: beijing_" + getNameByPinyin("beijing"));
+
+        System.out.println("---------------------------------------------------");
+        SpiderEnum[] spiders = SpiderEnum.values();
+        for (SpiderEnum spider : spiders) {
+            Set<String> citySet = getAllCityNameBySpider(spider);
+            Set<String> sortedCitySet = new TreeSet<String>(new Comparator<String>() {
+                @Override
+                public int compare(String o1, String o2) {
+                    String py1 = PinyinUtil.getPinYin(o1);
+                    String py2 = PinyinUtil.getPinYin(o2);
+                    return py1.compareTo(py2);
+                }
+            });
+            sortedCitySet.addAll(citySet);
+            System.out.println("----------------------------------------");
+            System.out.println(spider.name());
+            for (String sortedCityName : sortedCitySet) {
+                String enName = getEName(spider, sortedCityName);
+                System.out.println(sortedCityName + "=" + enName);
+            }
+        }
     }
 }
