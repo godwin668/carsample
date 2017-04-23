@@ -89,7 +89,7 @@ public class HttpClientUtil {
                     SpiderBase.logToFile("httpclienttimer", "[" + dfDateTime.format(new Date()) + "] Timer run Exception: " + e.getMessage());
                 }
             }
-        }, 0, 10000);
+        }, 0, 20000);
     }
 
     public static void main(String args[]) {
@@ -132,13 +132,13 @@ public class HttpClientUtil {
             e.printStackTrace();
         }
         Integer errorCount = httpClientIndexErrorCountMap.get(curIndex);
-        if (null != errorCount && errorCount > 1) {
+        if (null != errorCount && errorCount > 3) {
             logger.warn("[HttpClient NOT available] client pool index " + curIndex + " error count " + errorCount);
             SpiderBase.logToFile("httpclienterror", "[HttpClient NOT available] client pool index " + curIndex + " error count " + errorCount);
             int errorMapOverValveCount = 0;
             Collection<Integer> errorValues = httpClientIndexErrorCountMap.values();
             for (Integer errValue : errorValues) {
-                if (null != errorCount && errorCount > 1) {
+                if (null != errorCount && errorCount > 3) {
                     ++errorMapOverValveCount;
                 }
             }
