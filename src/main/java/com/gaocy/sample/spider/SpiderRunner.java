@@ -21,7 +21,7 @@ import java.util.concurrent.Executors;
  */
 public class SpiderRunner<T extends List<CarVo>> implements Callable {
 
-    public static final ExecutorService es = Executors.newFixedThreadPool(ConfUtil.getString("init.src.list").split(",").length + 1);
+    public static final ExecutorService es = Executors.newFixedThreadPool(10);
     private static DateFormat dfDate = new SimpleDateFormat("yyyyMMdd");
     private static DateFormat dfTime = new SimpleDateFormat("HHmmss");
     private Spider spider;
