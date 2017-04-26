@@ -11,6 +11,7 @@ import com.gaocy.sample.vo.CarDetailVo;
 import com.gaocy.sample.vo.CarVo;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 
 import java.io.File;
 import java.text.DateFormat;
@@ -42,7 +43,7 @@ public class DetailApp implements Callable {
     }
 
     public static void main(String[] args) {
-        String dateStr = "20170416";
+        String dateStr = "20170426";
         SpiderEnum[] spiderEnumArr = { SpiderEnum.che168, SpiderEnum.youxin };
         String[] cityArr = null;
         for (SpiderEnum spider : spiderEnumArr) {
@@ -97,16 +98,36 @@ public class DetailApp implements Callable {
         for (String city : cityArr) {
             Spider spider = SpiderFactory.getSpider(spiderEnum, new String[] { city });
             String spiderName = spider.getClass().getSimpleName().toLowerCase().replaceAll("spider", "");
+            String yestodayDateStr = dfDate.format(DateUtils.addDays(DateUtils.parseDate(dateStr, "yyyyMMdd"), -1));
+            List<CarVo> yestodayCarVoList = listCarVo(spiderEnum, city, yestodayDateStr);
             List<CarVo> carVoList = listCarVo(spiderEnum, city, dateStr);
-            System.out.println(city + "_" + carVoList.size());
-            SpiderBase.logToFile("logs/" + dfDate.format(new Date()) + "_" + spiderName, "[CARDETAIL] [" + dfDateTime.format(new Date()) + "] Start processing " + spiderName + " " + city + ", info size: " + carVoList.size());
+
+            // 新增车源
+            List<CarVo> carVoNewList = new ArrayList<CarVo>();
             for (CarVo carVo : carVoList) {
+                String carVoSrcId = carVo.getSrcId();
+                boolean isExist = false;
+                for (CarVo yestodayCarVo : yestodayCarVoList) {
+                    String yestodayCarVoSrcId = yestodayCarVo.getSrcId();
+                    if (null != carVoSrcId && carVoSrcId.equals(yestodayCarVoSrcId)) {
+                        isExist = true;
+                        break;
+                    }
+                }
+                if (!isExist) {
+                    carVoNewList.add(carVo);
+                }
+            }
+
+            System.out.println(city + "_" + carVoNewList.size());
+            SpiderBase.logToFile("logs/" + dfDate.format(new Date()) + "_" + spiderName, "[CARDETAIL] [" + dfDateTime.format(new Date()) + "] Start processing " + spiderName + " " + city + ", info size(yestoday|today|new): (" + yestodayCarVoList.size() + "|" + carVoList.size() + "|" + carVoNewList.size() + ")");
+            for (CarVo carVo : carVoNewList) {
                 CarDetailVo carDetailVo = spider.getByUrl(carVo);
                 if (null != carDetailVo && StringUtils.isNoneBlank(carDetailVo.getId())) {
                     SpiderBase.logToFile(dfDate.format(new Date()) + "/detail/" + spiderName + "/" + city, JSON.toJSONString(carDetailVo));
                 }
             }
-            SpiderBase.logToFile("logs/" + dfDate.format(new Date()) + "_" + spiderName, "[CARDETAIL] [" + dfDateTime.format(new Date()) + "] END processing " + spiderName + " " + city + ", info size: " + carVoList.size());
+            SpiderBase.logToFile("logs/" + dfDate.format(new Date()) + "_" + spiderName, "[CARDETAIL] [" + dfDateTime.format(new Date()) + "] END processing " + spiderName + " " + city + ", info size(yestoday|today|new): (" + yestodayCarVoList.size() + "|" + carVoList.size() + "|" + carVoNewList.size() + ")");
         }
         return null;
     }
