@@ -28,7 +28,7 @@ public class SpiderDetailServiceImpl {
     @Scheduled(cron = "${init.spider.detail.cron}")
     public void runDetailSpider() {
         String dateStr = dfDate.format(DateUtils.addDays(new Date(), -1));
-        SpiderEnum[] spiderEnumArr = { SpiderEnum.youxin };
+        SpiderEnum[] spiderEnumArr = { SpiderEnum.youxin, SpiderEnum.che168 };
         List<String> cityList = null;
         for (SpiderEnum spider : spiderEnumArr) {
             DetailApp app = new DetailApp(dateStr, spider, cityList);
