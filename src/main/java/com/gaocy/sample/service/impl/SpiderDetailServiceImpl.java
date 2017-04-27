@@ -29,9 +29,9 @@ public class SpiderDetailServiceImpl {
     public void runDetailSpider() {
         String dateStr = dfDate.format(DateUtils.addDays(new Date(), -1));
         SpiderEnum[] spiderEnumArr = { SpiderEnum.youxin };
-        String[] cityArr = null;
+        List<String> cityList = null;
         for (SpiderEnum spider : spiderEnumArr) {
-            DetailApp app = new DetailApp(dateStr, spider, cityArr);
+            DetailApp app = new DetailApp(dateStr, spider, cityList);
             SpiderRunner.es.submit(app);
         }
     }

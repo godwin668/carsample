@@ -9,6 +9,7 @@ import com.gaocy.sample.util.CityUtil;
 import com.gaocy.sample.util.ConfUtil;
 import com.gaocy.sample.vo.CarDetailVo;
 import com.gaocy.sample.vo.CarVo;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
@@ -34,18 +35,18 @@ public class DetailApp implements Callable {
 
     private String dateStr;
     private SpiderEnum spiderEnum;
-    private String[] cityArr;
+    private List<String> cityList;
 
-    public DetailApp(String dateStr, SpiderEnum spiderEnum, String[] cityArr) {
+    public DetailApp(String dateStr, SpiderEnum spiderEnum, List<String> cityArr) {
         this.dateStr = dateStr;
         this.spiderEnum = spiderEnum;
-        this.cityArr = cityArr;
+        this.cityList = cityArr;
     }
 
     public static void main(String[] args) {
         String dateStr = "20170426";
-        SpiderEnum[] spiderEnumArr = { SpiderEnum.che168, SpiderEnum.youxin };
-        String[] cityArr = null;
+        SpiderEnum[] spiderEnumArr = { SpiderEnum.youxin };
+        List<String> cityArr = null;
         for (SpiderEnum spider : spiderEnumArr) {
             DetailApp app = new DetailApp(dateStr, spider, cityArr);
             es.submit(app);
@@ -56,11 +57,11 @@ public class DetailApp implements Callable {
      * 获取列表页车源信息
      *
      * @param spider 抓取源
-     * @param city 城市
+     * @param cityList 城市列表，如果为空，则为所有城市
      * @param dateStr 日期
      * @return
      */
-    public static List<CarVo> listCarVo(SpiderEnum spider, String city, String dateStr) {
+    public static List<CarVo> listCarVo(SpiderEnum spider, List<String> cityList, String dateStr) {
         List<CarVo> carVoList = new ArrayList<CarVo>();
         File todayFile = new File(baseDir, dateStr + "/" + spider.name().toLowerCase() + ".txt");
         if (todayFile.isFile()) {
@@ -71,7 +72,7 @@ public class DetailApp implements Callable {
                     CarVo carVo = JSON.parseObject(sampleLine, CarVo.class);
                     String srcId = carVo.getSrcId();
                     String carCity = carVo.getCity();
-                    if (null != city && city.equals(carCity)) {
+                    if (null == cityList || cityList.size() < 1 || cityList.contains(carCity)) {
                         carVoList.add(carVo);
                     }
                 }
@@ -79,56 +80,57 @@ public class DetailApp implements Callable {
                 e.printStackTrace();
             }
         }
-        Collections.sort(carVoList, new Comparator<CarVo>() {
-            @Override
-            public int compare(CarVo o1, CarVo o2) {
-                String id1 = o1.getSrcId();
-                String id2 = o2.getSrcId();
-                return id1.compareTo(id2);  // 递增
-            }
-        });
         return carVoList;
+    }
+
+    public static Set<String> getIds(List<CarVo> carVoList) {
+        Set<String> idSet = new HashSet<String>();
+        if (null == carVoList || carVoList.size() < 1) {
+            return idSet;
+        }
+        for (CarVo carVo : carVoList) {
+            String srcId = carVo.getSrcId();
+            idSet.add(srcId);
+        }
+        return idSet;
+    }
+
+    public static Map<String, CarVo> getId2VoMap(List<CarVo> carVoList) {
+        Map<String, CarVo> id2VoMap = new HashMap<String, CarVo>();
+        if (null == carVoList || carVoList.size() < 1) {
+            return id2VoMap;
+        }
+        for (CarVo carVo : carVoList) {
+            String srcId = carVo.getSrcId();
+            id2VoMap.put(srcId, carVo);
+        }
+        return id2VoMap;
     }
 
     @Override
     public Object call() throws Exception {
-        if (null == cityArr || cityArr.length < 1) {
-            cityArr = CityUtil.getAllCityNameBySpider(spiderEnum).toArray(new String[] { });
-        }
-        for (String city : cityArr) {
-            Spider spider = SpiderFactory.getSpider(spiderEnum, new String[] { city });
-            String spiderName = spider.getClass().getSimpleName().toLowerCase().replaceAll("spider", "");
-            String yestodayDateStr = dfDate.format(DateUtils.addDays(DateUtils.parseDate(dateStr, "yyyyMMdd"), -1));
-            List<CarVo> yestodayCarVoList = listCarVo(spiderEnum, city, yestodayDateStr);
-            List<CarVo> carVoList = listCarVo(spiderEnum, city, dateStr);
+        Spider spider = SpiderFactory.getSpider(spiderEnum, null);
+        String spiderName = spider.getClass().getSimpleName().toLowerCase().replaceAll("spider", "");
+        String yestodayDateStr = dfDate.format(DateUtils.addDays(DateUtils.parseDate(dateStr, "yyyyMMdd"), -1));
 
-            // 新增车源
-            List<CarVo> carVoNewList = new ArrayList<CarVo>();
-            for (CarVo carVo : carVoList) {
-                String carVoSrcId = carVo.getSrcId();
-                boolean isExist = false;
-                for (CarVo yestodayCarVo : yestodayCarVoList) {
-                    String yestodayCarVoSrcId = yestodayCarVo.getSrcId();
-                    if (null != carVoSrcId && carVoSrcId.equals(yestodayCarVoSrcId)) {
-                        isExist = true;
-                        break;
-                    }
-                }
-                if (!isExist) {
-                    carVoNewList.add(carVo);
-                }
-            }
+        List<CarVo> yestodayCarVoList = listCarVo(spiderEnum, cityList, yestodayDateStr);
+        List<CarVo> todayCarVoList = listCarVo(spiderEnum, cityList, dateStr);
 
-            System.out.println(city + "_" + carVoNewList.size());
-            SpiderBase.logToFile("logs/" + dfDate.format(new Date()) + "_" + spiderName, "[CARDETAIL] [" + dfDateTime.format(new Date()) + "] Start processing " + spiderName + " " + city + ", info size(yestoday|today|new): (" + yestodayCarVoList.size() + "|" + carVoList.size() + "|" + carVoNewList.size() + ")");
-            for (CarVo carVo : carVoNewList) {
-                CarDetailVo carDetailVo = spider.getByUrl(carVo);
-                if (null != carDetailVo && StringUtils.isNoneBlank(carDetailVo.getId())) {
-                    SpiderBase.logToFile(dfDate.format(new Date()) + "/detail/" + spiderName + "/" + city, JSON.toJSONString(carDetailVo));
-                }
+        Set<String> yestodayIdSet = getIds(yestodayCarVoList);
+        Map<String, CarVo> id2VoMap = getId2VoMap(todayCarVoList);
+        Set<String> todayIdSet = id2VoMap.keySet();
+        Collection<String> newIdSet = CollectionUtils.subtract(todayIdSet, yestodayIdSet);
+
+        System.out.println(JSON.toJSONString(cityList) + "_" + newIdSet.size());
+        SpiderBase.logToFile("logs/" + dfDate.format(new Date()) + "_" + spiderName, "[CARDETAIL] [" + dfDateTime.format(new Date()) + "] Start processing " + spiderName + ", info size(yestoday|today|new): (" + yestodayIdSet.size() + "|" + todayIdSet.size() + "|" + newIdSet.size() + ")");
+        for (String srcId : newIdSet) {
+            CarVo carVo = id2VoMap.get(srcId);
+            CarDetailVo carDetailVo = spider.getByUrl(carVo);
+            if (null != carDetailVo && StringUtils.isNoneBlank(carDetailVo.getId())) {
+                SpiderBase.logToFile(dateStr + "/" + spiderName + "_detail", JSON.toJSONString(carDetailVo));
             }
-            SpiderBase.logToFile("logs/" + dfDate.format(new Date()) + "_" + spiderName, "[CARDETAIL] [" + dfDateTime.format(new Date()) + "] END processing " + spiderName + " " + city + ", info size(yestoday|today|new): (" + yestodayCarVoList.size() + "|" + carVoList.size() + "|" + carVoNewList.size() + ")");
         }
+        SpiderBase.logToFile("logs/" + dfDate.format(new Date()) + "_" + spiderName, "[CARDETAIL] [" + dfDateTime.format(new Date()) + "] END processing " + spiderName + ", info size(yestoday|today|new): (" + yestodayIdSet.size() + "|" + todayIdSet.size() + "|" + newIdSet.size() + ")");
         return null;
     }
 
@@ -148,11 +150,11 @@ public class DetailApp implements Callable {
         this.spiderEnum = spiderEnum;
     }
 
-    public String[] getCityArr() {
-        return cityArr;
+    public List<String> getCityList() {
+        return cityList;
     }
 
-    public void setCityArr(String[] cityArr) {
-        this.cityArr = cityArr;
+    public void setCityList(List<String> cityList) {
+        this.cityList = cityList;
     }
 }
