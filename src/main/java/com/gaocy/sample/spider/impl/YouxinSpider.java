@@ -44,7 +44,8 @@ public class YouxinSpider extends SpiderBase implements Spider {
         Set<String> idSet = new HashSet<String>();
         String url = URL_LIST_TEMPLATE.replaceFirst("<city>", cityEName);
         String[] mileageUriSubArr = { "sn_k0-1", "sn_k1-3", "sn_k3-6", "sn_k6-10", "sn_k10-20", "sn_k20-" };  // 里程
-        String[] halfPayUriSubArr = { "", "v5" };
+        // String[] halfPayUriSubArr = { "", "v5" };    // v5: 付一半
+        String[] halfPayUriSubArr = { "" };
         String regDateAndMileageRegex = "上牌(.*?)｜里程(.*?)万公里";
         for (String mileageUriSub : mileageUriSubArr) {                     // 循环所有里程
             String mileageUrl = url.replaceFirst("/s/", "/" + mileageUriSub + "/");

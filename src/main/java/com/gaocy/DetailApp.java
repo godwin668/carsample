@@ -45,7 +45,7 @@ public class DetailApp implements Callable {
 
     public static void main(String[] args) {
         String dateStr = "20170426";
-        SpiderEnum[] spiderEnumArr = { SpiderEnum.youxin };
+        SpiderEnum[] spiderEnumArr = { SpiderEnum.youxin, SpiderEnum.che168 };
         List<String> cityArr = null;
         for (SpiderEnum spider : spiderEnumArr) {
             DetailApp app = new DetailApp(dateStr, spider, cityArr);
