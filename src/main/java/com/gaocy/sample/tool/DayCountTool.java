@@ -9,6 +9,7 @@ import com.gaocy.sample.util.ConfUtil;
 import com.gaocy.sample.vo.CarVo;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 
 import java.io.File;
@@ -99,7 +100,6 @@ public class DayCountTool {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return diffCount;
     }
 
@@ -122,7 +122,7 @@ public class DayCountTool {
                     CarVo carVo = JSON.parseObject(sampleLine, CarVo.class);
                     String srcId = carVo.getSrcId();
                     String carCity = carVo.getCity();
-                    if (null != city && city.equals(carCity)) {
+                    if (StringUtils.isBlank(city) || city.equals(carCity)) {
                         todayIdSet.add(srcId);
                     }
                 }
