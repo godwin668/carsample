@@ -84,6 +84,12 @@ public class Che168Spider extends SpiderBase implements Spider {
                         vo.setMileage(infoMileage);
                         vo.setPrice(infoPrice);
                         vo.setAddress(infoHref);
+                        Map<String, String> paramMap = new HashMap<String, String>();
+                        String cpcCars = infoElement.attr("cpcpars");
+                        if (null != cpcCars && StringUtils.isNotBlank(cpcCars)) {
+                            paramMap.put("cpc", "1");
+                            vo.setParams(paramMap);
+                        }
                         if (!idSet.contains(infoId)) {
                             infoList.add(vo);
                             logToFile(dfDate.format(new Date()) + "/" + vo.getSrc().name().toLowerCase(), JSON.toJSONString(vo));
@@ -287,6 +293,10 @@ public class Che168Spider extends SpiderBase implements Spider {
             }
 
             Map<String, String> paramMap = new HashMap<String, String>();
+            Map<String, String> carVoParams = carVo.getParams();
+            if (null != carVoParams && carVoParams.size() > 0) {
+                paramMap.putAll(carVoParams);
+            }
             Elements basicInfoElements = detailDoc.select("#anchor01 ul li");
             if (null != basicInfoElements && basicInfoElements.size() > 0) {
                 for (Element basicInfoElement : basicInfoElements) {
