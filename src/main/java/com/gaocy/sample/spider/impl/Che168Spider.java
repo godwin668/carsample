@@ -114,6 +114,8 @@ public class Che168Spider extends SpiderBase implements Spider {
             String detailUrl = URL_BASE + carVo.getAddress();
             Document detailDoc = getDoc(detailUrl);
             Elements breadNavDoc = detailDoc.select(".breadnav a");
+            String[] brandNavArr = detailDoc.select(".breadnav").text().replaceAll("二手车", "").replaceAll("二手", "").split(">");
+
             String cityName = breadNavDoc.get(1).text();
 
             String carAddressStr = detailDoc.select(".car-address").text().replaceAll("&nbsp;", "").trim();
@@ -141,7 +143,7 @@ public class Che168Spider extends SpiderBase implements Spider {
             carDetailVo.setBrandId(brandId);
 
             // 品牌名称 brandName
-            String brandName = breadNavDoc.get(breadNavDoc.size() - 3).text().replace("二手车", "").replace("二手", "");
+            String brandName = brandNavArr[brandNavArr.length - 3];
             carDetailVo.setBrandName(brandName);
 
             // 车系ID seriesId
@@ -149,7 +151,7 @@ public class Che168Spider extends SpiderBase implements Spider {
             carDetailVo.setSeriesId(seriesId);
 
             // 车系名称 seriesName
-            String seriesName = breadNavDoc.get(breadNavDoc.size() - 2).text().replace("二手车", "").replace("二手", "");                            // 车系名称
+            String seriesName = brandNavArr[brandNavArr.length - 2];                                      // 车系名称
             carDetailVo.setSeriesName(seriesName);
 
             // 车型ID modelId
@@ -157,7 +159,7 @@ public class Che168Spider extends SpiderBase implements Spider {
             carDetailVo.setModelId(modelId);
 
             // 车型名称 modelName
-            String modelName = breadNavDoc.get(breadNavDoc.size() - 1).text().replace("二手车", "").replace("二手", "");                             // 车型名称
+            String modelName = brandNavArr[brandNavArr.length - 1];                          // 车型名称
             carDetailVo.setModelName(modelName);
 
             // 身份类型 identity
