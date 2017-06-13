@@ -69,7 +69,7 @@ public class HttpClientUtil {
                         Integer key = entry.getKey();
                         Integer value = entry.getValue();
                         if (null != key && null != value && value > 0) {
-                            String content = get("https://www.baidu.com/", key);
+                            String content = get("https://www.baidu.com/", key, null);
                             if (null != content && content.contains("百度一下")) {
                                 logger.info("[HttpClient Back to Normal] HttpClient pool index " + key + " error count " + value + " recovered.");
                                 SpiderBase.logToFile("httpclienttimer", "[" + dfDateTime.format(new Date()) + "] [HttpClient NORMAL] client pool index " + key + " error count " + value + " back to OK");
@@ -165,20 +165,32 @@ public class HttpClientUtil {
         SpiderBase.logToFile("httpclienterror", "[HttpClient ERROR] client pool index " + httpClientPoolIndex + " error count " + curErrorCount + ", cur error count map: " + JSON.toJSONString(httpClientIndexErrorCountMap));
     }
 
-    public static String get(String url) {
+    public static String get(String url, Map<String, String> headerMap) {
         int httpClientIndex = getHttpClientIndex(url);
-        return get(url, httpClientIndex);
+        return get(url, httpClientIndex, headerMap);
     }
 
-    public static String get(String url, int httpClientPoolIndex) {
+    public static String get(String url) {
+        int httpClientIndex = getHttpClientIndex(url);
+        return get(url, httpClientIndex, null);
+    }
+
+    public static String get(String url, int httpClientPoolIndex, Map<String, String> headerMap) {
         CloseableHttpClient httpClient = httpClientPool.get(httpClientPoolIndex);
         try {
             HttpGet httpGet = new HttpGet(url);
-            httpGet.addHeader("Accept", "text/html");
+            httpGet.addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
             httpGet.addHeader("Accept-Charset", "utf-8");
             httpGet.addHeader("Accept-Encoding", "gzip");
             httpGet.addHeader("Accept-Language", "en-US,en");
             httpGet.addHeader("User-Agent", UserAgentUtil.get());
+            if (null != headerMap && headerMap.size() > 0) {
+                for (Map.Entry<String, String> headerEntry : headerMap.entrySet()) {
+                    String headerKey = headerEntry.getKey();
+                    String headerValue = headerEntry.getValue();
+                    httpGet.addHeader(headerKey, headerValue);
+                }
+            }
             long startTime = System.currentTimeMillis();
             logger.debug("[HttpClient] START get url(" + url + ")");
             CloseableHttpResponse response = httpClient.execute(httpGet);

@@ -8,6 +8,7 @@ import com.gaocy.sample.vo.CarDetailVo;
 import com.gaocy.sample.vo.CarVo;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -17,6 +18,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Godwin on 11/16/16.
@@ -56,13 +58,17 @@ public class SpiderBase {
     }
 
     public static Document getDoc(String url) {
+        return getDoc(url, null);
+    }
+
+    public static Document getDoc(String url, Map<String, String> headerMap) {
         Document doc = null;
         for (int i = 0; i < 3; i++) {
             try {
                 if ("jsoup".equalsIgnoreCase(spiderConnector)) {
-                    doc = getDocByJsoup(url);
+                    doc = getDocByJsoup(url, headerMap);
                 } else if ("httpclient".equalsIgnoreCase(spiderConnector)) {
-                    doc = getDocByHttpClient(url);
+                    doc = getDocByHttpClient(url, headerMap);
                 }
                 break;
             } catch (Exception e) {
@@ -82,20 +88,31 @@ public class SpiderBase {
         }
     }
 
-    public static Document getDocByHttpClient(String url) throws Exception {
-        String content = HttpClientUtil.get(url);
+    public static Document getDocByHttpClient(String url, Map<String, String> headerMap) throws Exception {
+        String content = HttpClientUtil.get(url, headerMap);
         Document doc = Jsoup.parse(content);
         return doc;
     }
 
+    public static Document getDocByHttpClient(String url) throws Exception {
+        return getDocByHttpClient(url, null);
+    }
+
     public static Document getDocByJsoup(String url) throws Exception {
+        return getDocByJsoup(url, null);
+    }
+
+    public static Document getDocByJsoup(String url, Map<String, String> headerMap) throws Exception {
         Thread.sleep(sleepInterval);
         logToFile("getdocurl", dfDateTime.format(new Date()) + " " + url);
-        Document doc = Jsoup.connect(url)
+        Connection conn = Jsoup.connect(url)
                 .userAgent(UserAgentUtil.get())
                 .ignoreContentType(true)
-                .timeout(5000)
-                .get();
+                .timeout(5000);
+        if (null != headerMap && headerMap.size() > 0) {
+            conn = conn.headers(headerMap);
+        }
+        Document doc = conn.get();
         return doc;
     }
 

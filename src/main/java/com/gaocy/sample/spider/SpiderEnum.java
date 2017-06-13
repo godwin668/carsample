@@ -6,6 +6,7 @@ package com.gaocy.sample.spider;
 public enum SpiderEnum {
 
     guazi("https://www.guazi.com/bj/buy/o1/"),
+    guazi_deal("https://www.guazi.com/bj/dealrecord?tag_id=<seriesId>&date=<date>"),
     youxin("http://www.xin.com/beijing/s/i1/"),
     che168("http://www.che168.com/beijing/a0_0msdgscncgpi1ltocsp5exx0/"),
     renrenche("https://www.renrenche.com/bj/ershouche/p1");
