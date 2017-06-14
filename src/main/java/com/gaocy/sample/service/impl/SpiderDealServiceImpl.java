@@ -67,14 +67,14 @@ public class SpiderDealServiceImpl {
                     String seriesId = entry.getKey();
                     List<CarVo> carVoList = getList(indexDateStr + "00", seriesId);
                     for (CarVo vo : carVoList) {
-                        String imgUrl = vo.getAddress();
-                        Integer imgUrlCount = idMap.get(imgUrl);
+                        String srcId = vo.getSrcId();
+                        Integer imgUrlCount = idMap.get(srcId);
                         if (null != imgUrlCount && imgUrlCount > 0) {
-                            idMap.put(imgUrl, ++imgUrlCount);
+                            idMap.put(srcId, ++imgUrlCount);
                         } else {
                             ++uniqueVoSize;
                             SpiderBase.logToFile(dfDate.format(new Date()) + "/" + vo.getSrc().name().toLowerCase(), JSON.toJSONString(vo));
-                            idMap.put(imgUrl, 1);
+                            idMap.put(srcId, 1);
                         }
                     }
                     SpiderBase.logToFile("logs/" + dfDate.format(new Date()) + "_" + SpiderEnum.guazi_deal, "[DETAIL] [" + dfDateTime.format(new Date()) + "] query:" + indexDateStr + "_" + seriesId + ", vo size(U/A):" + uniqueVoSize + "/" + carVoList.size());
@@ -117,15 +117,23 @@ public class SpiderDealServiceImpl {
                     continue;
                 }
             }
+            String srcId = img;
+            srcId = srcId.replaceFirst(".*?\\.com/(.*?)\\.jpg.*", "$1");
+
+            Map<String, String> params = new HashMap<String, String>();
+            params.put("seriesId", seriesId);
+            params.put("month", dateMontStr);
 
             CarVo vo = new CarVo();
             vo.setSrc(SpiderEnum.guazi_deal);
             vo.setName(modelName);
-            vo.setAddress(img);
+            // vo.setAddress(url.replaceFirst(".*?guazi\\.com(.*)", "$1"));
+            vo.setSrcId(srcId);
             vo.setRegDate(year + "01");
             vo.setMileage(mileage);
             vo.setCity(city);
             vo.setPrice(dealPrice);
+            vo.setParams(params);
             list.add(vo);
             // SpiderBase.logToFile(dfDate.format(new Date()) + "/" + vo.getSrc().name().toLowerCase() + "_deal", JSON.toJSONString(vo));
         }
