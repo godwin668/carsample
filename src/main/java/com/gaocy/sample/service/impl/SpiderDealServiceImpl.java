@@ -33,6 +33,20 @@ public class SpiderDealServiceImpl {
     private static DateFormat dfDate = new SimpleDateFormat("yyyyMMdd");
     private static DateFormat dfDateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
+    private static List<String> userPool = new ArrayList<String>();
+    private static int userPoolIndex = 0;
+
+    static {
+        userPool.add("guaZiUserInfo=bMxpa%2Asm%2BzylXnh68R4t6");
+        userPool.add("guaZiUserInfo=cMxpKhg0ZxB%2AGxP4AsnMa");
+        userPool.add("guaZiUserInfo=cMxpKhg0h%2AhsKkPG%2BjIIwe");
+    }
+
+    public static String getUser() {
+        userPoolIndex = ++userPoolIndex % userPool.size();
+        return userPool.get(userPoolIndex);
+    }
+
     public static void main(String[] args) {
         runDealSpider();
     }
@@ -51,7 +65,6 @@ public class SpiderDealServiceImpl {
                 for (Map.Entry<String, ModelVo> entry : guaziSeriesEntityMap.entrySet()) {
                     int uniqueVoSize = 0;
                     String seriesId = entry.getKey();
-                    ModelVo guaziSeriesEntity = entry.getValue();
                     List<CarVo> carVoList = getList(indexDateStr + "00", seriesId);
                     for (CarVo vo : carVoList) {
                         String imgUrl = vo.getAddress();
@@ -77,8 +90,15 @@ public class SpiderDealServiceImpl {
         List<CarVo> list = new ArrayList<CarVo>();
         String url = URL_LIST_TEMPLATE.replaceFirst("<seriesId>", seriesId).replaceFirst("<date>", dateMontStr);
         Map<String, String> headerMap = new HashMap<String, String>();
-        headerMap.put("Cookie", "guaZiUserInfo=aMxp18EGX6Z0%2B6xuv7Yf3");
+        String user = getUser();
+        headerMap.put("Cookie", user);
+        SpiderBase.logToFile("logs/" + dfDate.format(new Date()) + "_" + SpiderEnum.guazi_deal + "_url", userPoolIndex + "_" + user + "_" + url);
+
+        // String content = HttpClientUtil.get(url, userPoolIndex, headerMap);
+        // Document document = Jsoup.parse(content);
+
         Document document = SpiderBase.getDoc(url, headerMap);
+
         Elements carDocs = document.select(".deal-list li");
         for (Element carDoc : carDocs) {
             String img = carDoc.select("img").get(0).attr("src");
