@@ -17,6 +17,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -37,9 +38,9 @@ public class SpiderDealServiceImpl {
     private static int userPoolIndex = 0;
 
     static {
-        userPool.add("guaZiUserInfo=bMxpa%2Asm%2BzylXnh68R4t6");
-        userPool.add("guaZiUserInfo=cMxpKhg0ZxB%2AGxP4AsnMa");
-        userPool.add("guaZiUserInfo=cMxpKhg0h%2AhsKkPG%2BjIIwe");
+        userPool.add("guaZiUserInfo=cMxTPyXmAl6ycftT03PGa");
+        userPool.add("guaZiUserInfo=6MxTPyXmdbvQVLhFB4TG0");
+        userPool.add("guaZiUserInfo=7MxTPyXmWHb1gAh6sAfPf");
     }
 
     public static String getUser() {
@@ -54,8 +55,13 @@ public class SpiderDealServiceImpl {
     @Scheduled(cron = "${init.spider.detail.cron}")
     public static void runDealSpider() {
         Map<String, Integer> idMap = new HashMap<String, Integer>();
-        String startDateStr = "201701";
-        Date endDate = new Date();
+        String startDateStr = "200001";
+        Date endDate = null;
+        try {
+            endDate = dfMonth.parse("201001");
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
         try {
             Date startDate = dfMonth.parse(startDateStr);
             SpiderBase.logToFile("logs/" + dfDate.format(new Date()) + "_" + SpiderEnum.guazi_deal, "[ALL START] [" + dfDateTime.format(new Date()) + "] From " + dfDate.format(startDate) + " to " + dfDate.format(endDate));
@@ -99,7 +105,14 @@ public class SpiderDealServiceImpl {
 
         Document document = SpiderBase.getDoc(url, headerMap);
 
+        if (null == document){
+            return list;
+        }
+
         Elements carDocs = document.select(".deal-list li");
+        if (null == carDocs){
+            return list;
+        }
         for (Element carDoc : carDocs) {
             String img = carDoc.select("img").get(0).attr("src");
             String modelName = carDoc.select(".deal-p1").text();
