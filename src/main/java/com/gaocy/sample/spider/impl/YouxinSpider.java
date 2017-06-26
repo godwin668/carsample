@@ -213,6 +213,7 @@ public class YouxinSpider extends SpiderBase implements Spider {
             Document detailDoc = getDoc(detailUrl);
             Elements breadNavDoc = detailDoc.select(".cd_m_nav a");
             String cityName = breadNavDoc.get(1).text().replaceAll("二手车", "");
+            String[] brandNavArr = detailDoc.select(".cd_m_nav").text().replaceAll("二手车", "").replaceAll("二手", "").replaceAll(cityName, "").split(" *> *");
 
             String htmlStr = detailDoc.html();
             // String jsonInfoRegex = "(?i)(?s).*?(\\{[^\\}]+'城市': '([^']+)','车辆ID':'([^']+)', '店铺ID':'([^']+)', '是否半价':'([^']+)'[^\\}]+}).*";
@@ -234,15 +235,15 @@ public class YouxinSpider extends SpiderBase implements Spider {
             carDetailVo.setName(carVo.getName());
 
             // 品牌名称 brandName
-            String brandName = breadNavDoc.get(2).text().replace("二手车", "").replaceFirst(cityName, "");
+            String brandName = brandNavArr[brandNavArr.length - 3];             // 品牌名称
             carDetailVo.setBrandName(brandName);
 
             // 车系名称 seriesName
-            String seriesName = breadNavDoc.get(3).text().replace("二手", "").replaceFirst(cityName, "");   // 车系名称
+            String seriesName = brandNavArr[brandNavArr.length - 2];            // 车系名称
             carDetailVo.setSeriesName(seriesName);
 
             // 车型名称 modelName
-            String modelName = detailDoc.select(".cd_m_nav").text().replaceFirst(".*>([^>]+)", "$1");  // 车型名称
+            String modelName = brandNavArr[brandNavArr.length - 1];             // 车型名称
             carDetailVo.setModelName(modelName);
 
             // 车辆颜色 color
@@ -313,8 +314,8 @@ public class YouxinSpider extends SpiderBase implements Spider {
             if (null != isYouxinAuthElements && isYouxinAuthElements.size() > 0) {
                 tags.add("优信认证");
             }
-            Elements isHalfPayElements = detailDoc.select(".cd_m_info_cover_fyb");
-            if (null != isHalfPayElements && isHalfPayElements.size() > 0) {
+            // Elements isHalfPayElements = detailDoc.select(".cd_m_info_cover_fyb");
+            if (null != carVo.getSrcId() && carVo.getSrcId().endsWith("h")) {
                 tags.add("付一半");
             }
             if (tags.size() > 0) {

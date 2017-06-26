@@ -114,9 +114,8 @@ public class Che168Spider extends SpiderBase implements Spider {
             String detailUrl = URL_BASE + carVo.getAddress();
             Document detailDoc = getDoc(detailUrl);
             Elements breadNavDoc = detailDoc.select(".breadnav a");
-            String[] brandNavArr = detailDoc.select(".breadnav").text().replaceAll("二手车", "").replaceAll("二手", "").split(">");
-
             String cityName = breadNavDoc.get(1).text();
+            String[] brandNavArr = detailDoc.select(".breadnav").text().replaceAll("二手车", "").replaceAll("二手", "").replaceAll(cityName, "").split(" *> *");
 
             String carAddressStr = detailDoc.select(".car-address").text().replaceAll("&nbsp;", "").trim();
             carAddressStr = removeWhiteSpace(carAddressStr);
