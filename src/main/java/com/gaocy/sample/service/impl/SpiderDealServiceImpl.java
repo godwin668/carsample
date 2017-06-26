@@ -38,9 +38,9 @@ public class SpiderDealServiceImpl {
     private static int userPoolIndex = 0;
 
     static {
-        userPool.add("guaZiUserInfo=cMxTPyXmAl6ycftT03PGa");
-        userPool.add("guaZiUserInfo=6MxTPyXmdbvQVLhFB4TG0");
-        userPool.add("guaZiUserInfo=7MxTPyXmWHb1gAh6sAfPf");
+        userPool.add("guaZiUserInfo=7MxTl3GksrpprE1NtNvd");
+        userPool.add("guaZiUserInfo=fMxTl3Gihw8BaZZcA943e");
+        userPool.add("guaZiUserInfo=eMxTl3GkDpHV9TZ4GrYDf");
     }
 
     public static String getUser() {
