@@ -52,32 +52,24 @@ public class GuaziSpider extends SpiderBase implements Spider {
                 SenderUtil.sendMessage(SenderUtil.MessageLevel.ERROR, "listByCity doc: " + listUrl);
                 continue;
             }
-            Elements infoElements = doc.select(".list ul li");
+            Elements infoElements = doc.select(".carlist li");
             if (null == infoElements || infoElements.size() < 1) {
                 SenderUtil.sendMessage(SenderUtil.MessageLevel.ERROR, "listByCity: " + listUrl);
             }
             for (Element infoElement : infoElements) {
                 try {
-                    String infoName = infoElement.select(".list-infoBox .infoBox a").get(0).text();
-                    String infoHref = infoElement.select(".list-infoBox .infoBox a").get(0).attr("href");
+                    String infoName = infoElement.select("a .t").get(0).text();
+                    String infoHref = infoElement.select("a").get(0).attr("href");
                     String infoCity = infoHref.replaceFirst("/(\\w+)/(\\w+).htm", "$1");
                     String infoCityName = CityUtil.getName(SpiderEnum.guazi, infoCity);
                     if (!cityName.equals(infoCityName)) {
                         continue;
                     }
                     String infoId = infoHref.replaceFirst("/(\\w+)/(\\w+).htm", "$2");
-                    String infoRegDateStr = infoElement.select(".list-infoBox .fc-gray span").get(0).text().replaceAll("上牌", "");
-                    String infoRegDate = infoRegDateStr.replaceFirst("(\\d+)年(\\d+)月", "$1$2");
-                    if (infoRegDate.length() != 5 && infoRegDate.length() != 6) {
-                        isOtherCity = true;
-                        break;
-                    }
-                    if (infoRegDate.length() == 5) {
-                        infoRegDate = infoRegDate.replaceFirst("(\\d{4})(\\d{1})", "$10$2");
-                    }
-                    String infoMileageStr = infoElement.select(".list-infoBox .fc-gray").get(0).text();
-                    String infoMileage = infoMileageStr.substring(infoMileageStr.indexOf("行驶") + 2).replaceAll("万公里", "");
-                    String infoPrice = infoElement.select(".list-infoBox .priType-s .priType").get(0).text().replaceAll("万", "");
+                    String infoRegDateMileageStr = infoElement.select(".t-i").get(0).text().replaceAll("年", "").replaceAll("万公里", "");
+                    String infoRegDate = infoRegDateMileageStr.split("\\|")[0];
+                    String infoMileage = infoRegDateMileageStr.split("\\|")[1];
+                    String infoPrice = infoElement.select(".t-price p").get(0).text().replaceAll("万", "");
 
                     CarVo vo = new CarVo();
                     vo.setSrc(SpiderEnum.guazi);
