@@ -119,6 +119,11 @@ public class DetailApp implements Callable {
         Set<String> yestodayIdSet = getIds(yestodayCarVoList);
         Map<String, CarVo> id2VoMap = getId2VoMap(todayCarVoList);
         Set<String> todayIdSet = id2VoMap.keySet();
+
+        if (null == yestodayIdSet || yestodayIdSet.size() < 1 || null == todayIdSet || todayIdSet.size() < 1) {
+            return null;
+        }
+
         Collection<String> newIdSet = CollectionUtils.subtract(todayIdSet, yestodayIdSet);
 
         System.out.println(JSON.toJSONString(cityList) + "_" + newIdSet.size());
