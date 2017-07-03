@@ -52,7 +52,7 @@ public class SpiderDealServiceImpl {
         runDealSpider();
     }
 
-    @Scheduled(cron = "${init.spider.detail.cron}")
+    // @Scheduled(cron = "${init.spider.detail.cron}")
     public static void runDealSpider() {
         Map<String, Integer> idMap = new HashMap<String, Integer>();
         String startDateStr = "200001";
