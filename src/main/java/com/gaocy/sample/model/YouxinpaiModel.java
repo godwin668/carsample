@@ -3,16 +3,11 @@ package com.gaocy.sample.model;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.gaocy.sample.spider.SpiderBase;
-import com.gaocy.sample.util.HttpClientUtil;
 import com.gaocy.sample.vo.ModelVo;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -32,7 +27,6 @@ public class YouxinpaiModel {
         try {
             String modelStr = FileUtils.readFileToString(file, "UTF-8");
             JSONArray jsonArr = JSON.parseArray(modelStr);
-
             for (Object obj : jsonArr) {
                 JSONObject jsonObj = (JSONObject) obj;
                 Integer brandId = jsonObj.getInteger("brandId");
@@ -43,11 +37,11 @@ public class YouxinpaiModel {
                 for (Object seriesJson : seriesJsonArr) {
                     JSONObject seriesJsonObj = (JSONObject) seriesJson;
                     Integer carMakeId = seriesJsonObj.getInteger("carMakeId");
-                    Integer makeName = seriesJsonObj.getInteger("makeName");
-                    Integer seiralId = seriesJsonObj.getInteger("seiralId");
-                    Integer carSeiralId = seriesJsonObj.getInteger("carSeiralId");
-                    Integer seiralName = seriesJsonObj.getInteger("seiralName");
-                    System.out.println();
+                    String makeName = seriesJsonObj.getString("makeName");
+                    Integer seriesId = seriesJsonObj.getInteger("seiralId");
+                    Integer carSeriesId = seriesJsonObj.getInteger("carSeiralId");
+                    String seriesName = seriesJsonObj.getString("seiralName");
+                    System.out.println(brandName + "(" + carBrandId + "), " + seriesName + "(" + carSeriesId + ")");
                 }
             }
         } catch (Exception e) {
