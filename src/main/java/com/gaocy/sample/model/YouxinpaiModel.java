@@ -53,6 +53,12 @@ public class YouxinpaiModel {
             }
 
             System.out.println("series size: " + seriesMap.size());
+
+            for (Map.Entry<String, ModelVo> entry : seriesMap.entrySet()) {
+                String key = entry.getKey();
+                ModelVo modelVo = entry.getValue();
+                System.out.println(key + " - " + JSON.toJSONString(modelVo));
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
