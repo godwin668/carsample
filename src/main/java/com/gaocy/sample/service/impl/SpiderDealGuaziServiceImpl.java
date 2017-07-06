@@ -4,16 +4,13 @@ import com.alibaba.fastjson.JSON;
 import com.gaocy.sample.model.GuaziModel;
 import com.gaocy.sample.spider.SpiderBase;
 import com.gaocy.sample.spider.SpiderEnum;
-import com.gaocy.sample.util.HttpClientUtil;
 import com.gaocy.sample.vo.CarVo;
 import com.gaocy.sample.vo.ModelVo;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.text.DateFormat;
@@ -26,7 +23,7 @@ import java.util.*;
  */
 
 @Service
-public class SpiderDealServiceImpl {
+public class SpiderDealGuaziServiceImpl {
 
     private static String URL_LIST_TEMPLATE = "https://www.guazi.com/bj/dealrecord?tag_id=<seriesId>&date=<date>";
 
