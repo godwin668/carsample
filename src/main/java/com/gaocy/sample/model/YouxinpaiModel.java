@@ -33,7 +33,7 @@ public class YouxinpaiModel {
                 Integer carBrandId = jsonObj.getInteger("carBrandId");
                 String brandName = jsonObj.getString("brandName");
                 JSONArray seriesJsonArr = jsonObj.getJSONArray("carSerialList");
-                System.out.println(brandId + "_" + carBrandId + "_" + brandName + ": " + seriesJsonArr);
+                // System.out.println(brandId + "_" + carBrandId + "_" + brandName + ": " + seriesJsonArr);
                 for (Object seriesJson : seriesJsonArr) {
                     JSONObject seriesJsonObj = (JSONObject) seriesJson;
                     Integer carMakeId = seriesJsonObj.getInteger("carMakeId");
@@ -42,8 +42,17 @@ public class YouxinpaiModel {
                     Integer carSeriesId = seriesJsonObj.getInteger("carSeiralId");
                     String seriesName = seriesJsonObj.getString("seiralName");
                     System.out.println(brandName + "(" + carBrandId + "), " + seriesName + "(" + carSeriesId + ")");
+
+                    ModelVo modelVo = new ModelVo();
+                    modelVo.setBrandId("" + carBrandId);
+                    modelVo.setBrandName(brandName);
+                    modelVo.setSeriesId("" + carSeriesId);
+                    modelVo.setSeriesName(seriesName);
+                    seriesMap.put("" + carSeriesId, modelVo);
                 }
             }
+
+            System.out.println("series size: " + seriesMap.size());
         } catch (Exception e) {
             e.printStackTrace();
         }
