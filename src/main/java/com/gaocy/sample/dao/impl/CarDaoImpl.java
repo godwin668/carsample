@@ -2,8 +2,6 @@ package com.gaocy.sample.dao.impl;
 
 import com.gaocy.sample.dao.CarDao;
 import com.gaocy.sample.vo.CarVo;
-import com.mongodb.BasicDBObjectBuilder;
-import com.mongodb.DBCollection;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Repository;
 
@@ -15,15 +13,7 @@ public class CarDaoImpl extends BaseDaoImpl implements CarDao, InitializingBean 
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		if (null != db) {
-			DBCollection coll;
-			coll = db.getCollection(COLL_DOC);
-			coll.createIndex(BasicDBObjectBuilder.start().add(_ID, 1).get());
-			coll.createIndex(BasicDBObjectBuilder.start().add(UUID, 1).get());
-			coll.createIndex(BasicDBObjectBuilder.start().add(CTIME, 1).get());
-			coll.createIndex(BasicDBObjectBuilder.start().add(STATUS, 1).get());
-			coll.createIndex(BasicDBObjectBuilder.start().add(STATUS_CONVERT, 1).get());
-		}
+
 	}
 
 
