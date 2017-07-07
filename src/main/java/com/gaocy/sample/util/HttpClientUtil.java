@@ -9,6 +9,8 @@ import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -167,33 +169,56 @@ public class HttpClientUtil {
 
     public static String get(String url, Map<String, String> headerMap) {
         int httpClientIndex = getHttpClientIndex(url);
-        return get(url, httpClientIndex, headerMap);
+        return get(url, true, httpClientIndex, headerMap);
+    }
+
+    public static String post(String url, Map<String, String> headerMap) {
+        int httpClientIndex = getHttpClientIndex(url);
+        return get(url, false, httpClientIndex, headerMap);
     }
 
     public static String get(String url) {
         int httpClientIndex = getHttpClientIndex(url);
-        return get(url, httpClientIndex, null);
+        return get(url, true, httpClientIndex, null);
+    }
+
+    public static String post(String url) {
+        int httpClientIndex = getHttpClientIndex(url);
+        return get(url, false, httpClientIndex, null);
     }
 
     public static String get(String url, int httpClientPoolIndex, Map<String, String> headerMap) {
+        return get(url, true, httpClientPoolIndex, headerMap);
+    }
+
+    public static String post(String url, int httpClientPoolIndex, Map<String, String> headerMap) {
+        return get(url, false, httpClientPoolIndex, headerMap);
+    }
+
+    public static String get(String url, boolean isHttpGet, int httpClientPoolIndex, Map<String, String> headerMap) {
         CloseableHttpClient httpClient = httpClientPool.get(httpClientPoolIndex);
         try {
-            HttpGet httpGet = new HttpGet(url);
-            httpGet.addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
-            httpGet.addHeader("Accept-Charset", "utf-8");
-            httpGet.addHeader("Accept-Encoding", "gzip");
-            httpGet.addHeader("Accept-Language", "en-US,en");
-            httpGet.addHeader("User-Agent", UserAgentUtil.get());
+            HttpRequestBase httpReq;
+            if (isHttpGet) {
+                httpReq = new HttpGet(url);
+            } else {
+                httpReq = new HttpPost(url);
+            }
+            httpReq.addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
+            httpReq.addHeader("Accept-Charset", "utf-8");
+            httpReq.addHeader("Accept-Encoding", "gzip");
+            httpReq.addHeader("Accept-Language", "en-US,en");
+            httpReq.addHeader("User-Agent", UserAgentUtil.get());
             if (null != headerMap && headerMap.size() > 0) {
                 for (Map.Entry<String, String> headerEntry : headerMap.entrySet()) {
                     String headerKey = headerEntry.getKey();
                     String headerValue = headerEntry.getValue();
-                    httpGet.addHeader(headerKey, headerValue);
+                    httpReq.addHeader(headerKey, headerValue);
                 }
             }
             long startTime = System.currentTimeMillis();
             logger.debug("[HttpClient] START get url(" + url + ")");
-            CloseableHttpResponse response = httpClient.execute(httpGet);
+            CloseableHttpResponse response = httpClient.execute(httpReq);
             try {
                 int statusCode = response.getStatusLine().getStatusCode();
                 long endTime = System.currentTimeMillis();

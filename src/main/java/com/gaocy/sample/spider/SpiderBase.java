@@ -103,17 +103,25 @@ public class SpiderBase {
     }
 
     public static Document getDocByJsoup(String url, Map<String, String> headerMap) throws Exception {
+        return getOrPostDocByJsoup(url, true, headerMap, null);
+    }
+
+    public static Document getOrPostDocByJsoup(String url, boolean isHttpGet, Map<String, String> headerMap, Map<String, String> dataMap) throws Exception {
         Thread.sleep(sleepInterval);
         logToFile("getdocurl", dfDateTime.format(new Date()) + " " + url);
         Connection conn = Jsoup.connect(url)
                 .userAgent(UserAgentUtil.get())
                 .ignoreContentType(true)
+                .data(dataMap)
                 .timeout(5000);
         if (null != headerMap && headerMap.size() > 0) {
             conn = conn.headers(headerMap);
         }
-        Document doc = conn.get();
-        return doc;
+        if (isHttpGet) {
+            return conn.get();
+        } else {
+            return conn.post();
+        }
     }
 
     public static void log(Object msg) {

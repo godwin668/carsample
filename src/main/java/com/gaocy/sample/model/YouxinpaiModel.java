@@ -41,7 +41,7 @@ public class YouxinpaiModel {
                     Integer seriesId = seriesJsonObj.getInteger("seiralId");
                     Integer carSeriesId = seriesJsonObj.getInteger("carSeiralId");
                     String seriesName = seriesJsonObj.getString("seiralName");
-                    System.out.println(brandName + "(" + carBrandId + "), " + seriesName + "(" + carSeriesId + ")");
+                    // System.out.println(brandName + "(" + carBrandId + "), " + seriesName + "(" + carSeriesId + ")");
 
                     ModelVo modelVo = new ModelVo();
                     modelVo.setBrandId("" + carBrandId);
@@ -57,7 +57,7 @@ public class YouxinpaiModel {
             for (Map.Entry<String, ModelVo> entry : seriesMap.entrySet()) {
                 String key = entry.getKey();
                 ModelVo modelVo = entry.getValue();
-                System.out.println(key + " - " + JSON.toJSONString(modelVo));
+                // System.out.println(key + " - " + JSON.toJSONString(modelVo));
             }
         } catch (Exception e) {
             e.printStackTrace();
